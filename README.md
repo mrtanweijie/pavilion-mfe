@@ -135,7 +135,35 @@ window.addEventListener('pavilion:segment-switch', (e) => {
 })
 ```
 
-`trigger` 值：`init` / `pushState` / `replaceState` / `popstate`
+`trigger` 値：`init` / `pushState` / `replaceState` / `popstate`
+
+事件 `detail` 包含 `{ url, trigger, path, appCode }`，其中 `path` 为解析后的路径名，`appCode` 为当前活跃段编码，可用于路由守卫：
+
+```typescript
+window.addEventListener('pavilion:before-routing', (e) => {
+  const { path, appCode } = (e as CustomEvent).detail
+  // 权限检查、埋点、加载状态等
+})
+```
+
+### 段 Keep-Alive 缓存
+
+段注册时设置 `keepAlive: true`，切换离开时不销毁框架实例，仅隐藏 DOM（`display:none`）。切换回来时直接恢复显示，跳过重新 `mount`，段内状态完整保留：
+
+```typescript
+const pavilionRouter = createPavilionRouter({
+  apps: mfeApps.map((seg) => ({
+    name: seg.appCode,
+    load: async () => { /* ... */ },
+    activeWhen: (path) => seg.routes.some(/* ... */),
+    keepAlive: true,  // ← 启用缓存
+  })),
+})
+```
+
+状态机增加 `CACHED` 状态：`MOUNTED → (unmount) → CACHED → (restore) → MOUNTED`
+
+沙箱在缓存时仍会 `deactivate()`（清理 timers/listeners），恢复时重新 `activate()`。
 
 ### 运行时预加载
 
@@ -222,6 +250,30 @@ Shell 通过 `mfe.json` 声明所有段：
 ```
 
 既是构建配置源，也是运行时路由注册源——单一事实来源。
+
+## 构建优化
+
+`@pavilion/vite` 在 build 模式自动应用以下优化：
+
+| 优化项 | 说明 |
+|--------|------|
+| `esbuild.drop: ['debugger']` | 生产环境移除 debugger 语句 |
+| `sourcemap: false` | 禁用 sourcemap 减小体积 |
+| `cssCodeSplit: true` | CSS 按路由拆分 |
+| chunk 命名规则 | `static/js/[name]-[hash].js` / `static/[ext]/[name]-[hash].[ext]` |
+| `publicDir: false`（Shell） | Shell 无静态资源目录 |
+| Top-Level Await | 自动注入 `vite-plugin-top-level-await`（MF shared 必需） |
+
+### Dev Server 代理
+
+`PavilionPluginOptions.proxy` 支持配置 dev 模式代理规则：
+
+```typescript
+pavilion({
+  role: 'shell',
+  proxy: { '/api': 'http://localhost:3000' },
+})
+```
 
 ## 多仓库架构
 

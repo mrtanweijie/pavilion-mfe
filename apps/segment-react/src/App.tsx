@@ -1,7 +1,7 @@
 import { Component } from 'react'
 import { RouterProvider } from 'react-router-dom'
 import { ConfigProvider, App as AntApp, Result, Button } from 'antd'
-import { router } from './router'
+import type { Router } from '@remix-run/router'
 import './assets/index.css'
 
 // ---------- 简易 ErrorBoundary ----------
@@ -47,7 +47,7 @@ const themeToken = {
 }
 
 // ---------- App ----------
-export default function App() {
+export default function App({ router }: { router: Router }) {
   return (
     <ErrorBoundary fallback={ErrorFallback}>
       <ConfigProvider theme={{ token: themeToken }}>

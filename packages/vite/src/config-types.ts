@@ -1,4 +1,4 @@
-import type { PluginOption } from 'vite'
+import type { PluginOption, ProxyOptions } from 'vite'
 
 export interface FederationUserOptions {
   name?: string
@@ -33,4 +33,7 @@ export interface PavilionPluginOptions extends FederationUserOptions {
     generateTypes?: boolean | Record<string, unknown>
     consumeTypes?: boolean | Record<string, unknown>
   }
+
+  /** Dev server proxy rules (dev mode only) */
+  proxy?: Record<string, string | ProxyOptions>
 }

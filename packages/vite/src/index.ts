@@ -1,6 +1,7 @@
 import type { PluginOption } from 'vite'
 import { federation as mfFederation } from '@module-federation/vite'
 import type { ModuleFederationOptions } from '@module-federation/vite'
+import topAwait from 'vite-plugin-top-level-await'
 import type { PavilionPluginOptions } from './config-types.js'
 import { resolveRemotes } from './remote-resolver.js'
 import { wsDiscoveryPlugin } from './ws-discovery.js'
@@ -12,7 +13,7 @@ export type * from './config-types.js'
 export function pavilion(options: PavilionPluginOptions): PluginOption[] {
   const plugins: PluginOption[] = []
 
-  // ─── 1. Build config: base URL ───
+  // ─── 1. Build config: base URL + optimizations ───
   plugins.push({
     name: 'pavilion:build-config',
     apply: 'build',
@@ -20,11 +21,40 @@ export function pavilion(options: PavilionPluginOptions): PluginOption[] {
       if (options.role === 'segment' || options.role === 'runtime') {
         config.base = `${options.cdn ?? ''}/mfe/${options.name ?? 'unknown'}/`
       }
+
       // MF shared chunks (e.g. Element Plus ~950kB, Ant Design ~1.5MB)
       // are single-load shared bundles — raise the limit to avoid noise.
       const build = config.build ?? (config.build = {})
       if (!build.chunkSizeWarningLimit) {
         build.chunkSizeWarningLimit = 1500
+      }
+      // Disable sourcemaps in production for smaller bundles
+      if (build.sourcemap === undefined) {
+        build.sourcemap = false
+      }
+      // Enable CSS code splitting for per-route styles
+      if (build.cssCodeSplit === undefined) {
+        build.cssCodeSplit = true
+      }
+      // Organize chunk/asset output into static/{js,css,ext} dirs
+      const rollup = build.rollupOptions ?? (build.rollupOptions = {})
+      const output = rollup.output ?? (rollup.output = {})
+      if (typeof output === 'object' && !Array.isArray(output)) {
+        if (!output.chunkFileNames) output.chunkFileNames = 'static/js/[name]-[hash].js'
+        if (!output.entryFileNames) output.entryFileNames = 'static/js/[name]-[hash].js'
+        if (!output.assetFileNames) output.assetFileNames = 'static/[ext]/[name]-[hash].[ext]'
+      }
+
+      // Drop debugger statements in production
+      const esbuild = config.esbuild ?? (config.esbuild = {})
+      if (typeof esbuild === 'object') {
+        const drop = esbuild.drop ?? (esbuild.drop = [])
+        if (!drop.includes('debugger')) drop.push('debugger')
+      }
+
+      // Shell: no public dir (everything is served via MF remotes)
+      if (options.role === 'shell') {
+        config.publicDir = false
       }
     },
   } as PluginOption)
@@ -44,6 +74,29 @@ export function pavilion(options: PavilionPluginOptions): PluginOption[] {
       }
     },
   } as PluginOption)
+
+  // ─── 1b. Top-level await (build only) ───
+  // Required for MF shared modules that use top-level await syntax.
+  // Injected only in build mode to avoid interfering with dev ESM.
+  plugins.push({
+    name: 'pavilion:top-await',
+    apply: 'build',
+    config: () => ({
+      plugins: [topAwait()],
+    }),
+  } as PluginOption)
+
+  // ─── 1c. Dev server proxy ───
+  if (options.proxy) {
+    plugins.push({
+      name: 'pavilion:proxy',
+      apply: 'serve',
+      config: (config) => {
+        const server = config.server ?? (config.server = {})
+        server.proxy = { ...server.proxy, ...options.proxy }
+      },
+    } as PluginOption)
+  }
 
   // ─── 2. Module Federation ───
   const mfOptions: ModuleFederationOptions = {

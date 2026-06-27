@@ -7,6 +7,7 @@
       "name": "Demo (Vue)",
       "routes": ["/demo"],
       "devPort": 6020,
+      "keepAlive": true,
       "children": [
         { "name": "列表页", "route": "/demo/list" },
         { "name": "详情页", "route": "/demo/detail" },

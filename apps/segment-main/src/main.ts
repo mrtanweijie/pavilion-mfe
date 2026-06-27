@@ -57,6 +57,8 @@ const pavilionRouter = createPavilionRouter({
       seg.routes.some((route: string) =>
         path.replace(/\/?$/, '/').startsWith(route.replace(/\/?$/, '/'))
       ),
+    basename: seg.routes[0] ?? '',
+    keepAlive: seg.keepAlive ?? false,
   })),
 })
 

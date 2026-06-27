@@ -60,7 +60,7 @@ function mapPathConfigToRoute(cfg: Record<string, unknown>): any[] {
   })
 }
 
-function generateRouteConfig() {
+export function generateRouteConfig() {
   const { '404': notFound, ...pathConfig } = generatePathConfig() as Record<string, unknown>
 
   return [
@@ -75,6 +75,24 @@ function generateRouteConfig() {
   ]
 }
 
-export const router: Router = createBrowserRouter(generateRouteConfig(), {
-  basename: '/react',
-})
+/**
+ * Create a browser router for segment mode (inside Shell).
+ * Called inside mount() where the Sandbox is already active,
+ * so popstate listeners are properly isolated — they only fire
+ * when the segment's route is active, preventing basename
+ * mismatch warnings when navigating to other segments.
+ */
+export function createSegmentRouter(basename: string = '/react'): Router {
+  return createBrowserRouter(generateRouteConfig(), {
+    basename,
+  })
+}
+
+/**
+ * Create a browser router for standalone mode.
+ */
+export function createStandaloneRouter(): Router {
+  return createBrowserRouter(generateRouteConfig(), {
+    basename: '/react',
+  })
+}

@@ -28,9 +28,11 @@ const routes = [
   },
   {
     // catch-all：微前端段路由（/demo/*, /react/* 等）
+    // 实际渲染由 #pavilion-container（在 MainLayout 中）处理，
+    // 此路由仅用于让 Vue Router 匹配段路径，保持 route.path 正确更新。
     path: '/:pathMatch(.*)*',
     name: 'MFPage',
-    component: () => import('../pages/mf-page.vue'),
+    component: { render: () => null },
   },
 ]
 

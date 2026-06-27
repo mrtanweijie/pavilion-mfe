@@ -8,14 +8,18 @@
       "types": "./dist/index.d.ts"
     }
   },
-  "files": ["dist", "src"],
+  "files": [
+    "dist",
+    "src"
+  ],
   "scripts": {
     "dev": "tsc --watch",
     "build": "tsc",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@module-federation/vite": "^1.1.0"
+    "@module-federation/vite": "^1.1.0",
+    "vite-plugin-top-level-await": "^1.6.0"
   },
   "devDependencies": {
     "postcss": "^8.4.0",

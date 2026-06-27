@@ -2,13 +2,28 @@
   <el-container class="segment-main">
     <Sidebar />
     <el-main class="main">
-      <router-view />
+      <router-view v-show="!isSegmentRoute" />
+      <div id="pavilion-container" v-show="isSegmentRoute"></div>
     </el-main>
   </el-container>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
 import Sidebar from './Sidebar.vue'
+import mfeConfig from '../../mfe.json'
+
+const route = useRoute()
+
+/** Whether the current route belongs to a micro-frontend segment */
+const isSegmentRoute = computed(() =>
+  mfeConfig.apps.some((seg: any) =>
+    seg.routes.some((r: string) =>
+      route.path.replace(/\/?$/, '/').startsWith(r.replace(/\/?$/, '/'))
+    )
+  )
+)
 </script>
 
 <style>
@@ -50,5 +65,11 @@ body,
   background-color: #f0f2f5;
   padding: 20px;
   overflow: auto;
+}
+
+/* 微前端容器 */
+#pavilion-container {
+  height: 100%;
+  min-height: 400px;
 }
 </style>

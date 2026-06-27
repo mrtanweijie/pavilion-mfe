@@ -4,6 +4,10 @@ export interface SegmentApp {
   name: string
   load: () => Promise<SegmentLifecycle>
   activeWhen: (path: string) => boolean
+  /** Route prefix passed to the segment as ctx.basename (e.g. '/react') */
+  basename?: string
+  /** Keep this segment's framework instance alive when unmounted (display:none only) */
+  keepAlive?: boolean
 }
 
 export interface SegmentLifecycle {
@@ -31,11 +35,13 @@ export type AppStatus =
   | 'MOUNTED'
   | 'UNMOUNTING'
   | 'UNMOUNTED'
+  | 'CACHED'  // keep-alive: framework instance retained, display:none
 
 export interface RegisteredApp {
   name: string
   app: () => Promise<SegmentLifecycle>
   activeWhen: (path: string) => boolean
+  basename: string
   status: AppStatus
   lifecycle: SegmentLifecycle | null
   container: HTMLElement | null
