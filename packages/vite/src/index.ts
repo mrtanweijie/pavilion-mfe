@@ -39,6 +39,7 @@ export function pavilion(options: PavilionPluginOptions): PluginOption[] {
   if (options.shared) mfOptions.shared = options.shared as ModuleFederationOptions['shared']
   if (options.shareStrategy) mfOptions.shareStrategy = options.shareStrategy
   if (options.runtimePlugins) mfOptions.runtimePlugins = options.runtimePlugins
+  if (options.dts !== undefined) (mfOptions as any).dts = options.dts
 
   // Manifest at root level (no filePath) so relative paths resolve correctly
   if (options.manifest !== false) {

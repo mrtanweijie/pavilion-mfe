@@ -21,9 +21,11 @@ export default defineConfig(({ command }: ConfigEnv) => {
       vue(),
       pavilion({
         role: 'shell',
-        name: 'demo-shell',
+        name: 'segment-main',
         remotes: command === 'serve' ? remotes : undefined,
         pavilionRemotes: command === 'build' ? pavilionRemotes : undefined,
+        // 开发模式禁用远程 DTS 类型下载（避免段未启动时刷屏警告）
+        dts: command === 'serve' ? false : undefined,
       }),
     ],
     server: { port: 6010 },

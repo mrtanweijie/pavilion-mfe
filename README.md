@@ -123,8 +123,8 @@ Shell 运行在 `http://localhost:6010`，Vue 段在 `6020`，React 段在 `6030
 ## 开发
 
 ```bash
-# 仅启动 Shell（需要段单独启动）
-cd apps/shell && pnpm dev
+# 仅启动主应用（需要段单独启动）
+cd apps/segment-main && pnpm dev
 
 # 启动 Vue 段（独立开发或配合 Shell）
 cd apps/segment-demo && pnpm dev

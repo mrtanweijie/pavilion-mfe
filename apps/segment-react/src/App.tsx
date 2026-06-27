@@ -1,50 +1,63 @@
-import { useState, useEffect } from 'react'
+import { Component } from 'react'
+import { RouterProvider } from 'react-router-dom'
+import { ConfigProvider, App as AntApp, Result, Button } from 'antd'
+import { router } from './router'
+import './assets/index.css'
 
-function ListPage() {
-  return (
-    <div>
-      <h3>列表页</h3>
-      <ul>
-        {[1,2,3,4,5].map(i => <li key={i}>条目 {i}</li>)}
-      </ul>
-    </div>
-  )
+// ---------- 简易 ErrorBoundary ----------
+interface EBProps {
+  children: React.ReactNode
+  fallback: React.ComponentType<{ error: Error }>
+}
+interface EBState {
+  error: Error | null
 }
 
-function DetailPage() {
-  return (
-    <div>
-      <h3>详情页</h3>
-      <p>这是详情页的内容区域。</p>
-    </div>
-  )
-}
-
-function HomePage() {
-  return <p style={{ color: '#999' }}>选择左侧菜单进入子应用页面</p>
-}
-
-function App() {
-  const [page, setPage] = useState('')
-
-  useEffect(() => {
-    const updatePage = () => {
-      const path = window.location.pathname
-      if (path.startsWith('/react/list')) setPage('list')
-      else if (path.startsWith('/react/detail')) setPage('detail')
-      else setPage('')
+class ErrorBoundary extends Component<EBProps, EBState> {
+  state: EBState = { error: null }
+  static getDerivedStateFromError(error: Error) { return { error } }
+  render() {
+    if (this.state.error) {
+      const Fallback = this.props.fallback
+      return <Fallback error={this.state.error} />
     }
-    updatePage()
-    window.addEventListener('popstate', updatePage)
-    return () => window.removeEventListener('popstate', updatePage)
-  }, [])
+    return this.props.children
+  }
+}
 
+function ErrorFallback({ error }: { error: Error }) {
   return (
-    <div style={{ padding: 24, background: '#fff', borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
-      <h2 style={{ margin: '0 0 16px', color: '#1890ff' }}>React 子应用</h2>
-      {page === 'list' ? <ListPage /> : page === 'detail' ? <DetailPage /> : <HomePage />}
-    </div>
+    <Result
+      status="error"
+      title="出错了"
+      subTitle={error.message}
+      extra={
+        <Button type="primary" onClick={() => location.reload()}>
+          重试
+        </Button>
+      }
+    />
   )
 }
 
-export default App
+// ---------- Antd 主题 ----------
+const themeToken = {
+  colorPrimary: '#1890ff',
+  borderRadius: 6,
+}
+
+// ---------- App ----------
+export default function App() {
+  return (
+    <ErrorBoundary fallback={ErrorFallback}>
+      <ConfigProvider theme={{ token: themeToken }}>
+        <AntApp>
+          <div className="react-app">
+            <h2 className="react-app-title">React 子应用</h2>
+            <RouterProvider router={router} future={{ v7_startTransition: true }} />
+          </div>
+        </AntApp>
+      </ConfigProvider>
+    </ErrorBoundary>
+  )
+}

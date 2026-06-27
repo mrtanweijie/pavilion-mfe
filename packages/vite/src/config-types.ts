@@ -27,4 +27,10 @@ export interface PavilionPluginOptions extends FederationUserOptions {
 
   /** CSS scope: files to exclude from prefixing */
   cssExclude?: RegExp[]
+
+  /** DTS type generation/consumption. Set false to disable. */
+  dts?: boolean | {
+    generateTypes?: boolean | Record<string, unknown>
+    consumeTypes?: boolean | Record<string, unknown>
+  }
 }

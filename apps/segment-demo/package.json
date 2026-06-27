@@ -10,7 +10,9 @@
   },
   "dependencies": {
     "vue": "^3.5.0",
-    "vue-router": "^4.4.0"
+    "vue-router": "^4.4.0",
+    "element-plus": "^2.8.0",
+    "@pavilion/router": "workspace:*"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.1.0",

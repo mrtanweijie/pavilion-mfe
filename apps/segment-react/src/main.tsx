@@ -19,7 +19,6 @@ export default {
 }
 
 /** 独立运行时自启动 */
-// 使用 React 的内部标记检测：如果 #root 上已有 React 根节点（壳应用），不执行独立渲染
 const rootEl = document.getElementById('root')
 if (rootEl && !(rootEl as any)._reactRootContainer) {
   const root = createRoot(rootEl)
