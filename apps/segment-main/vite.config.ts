@@ -24,10 +24,17 @@ export default defineConfig(({ command }: ConfigEnv) => {
         name: 'segment-main',
         remotes: command === 'serve' ? remotes : undefined,
         pavilionRemotes: command === 'build' ? pavilionRemotes : undefined,
-        // 开发模式禁用远程 DTS 类型下载（避免段未启动时刷屏警告）
-        dts: command === 'serve' ? false : undefined,
+        dts: false,
       }),
     ],
     server: { port: 6010 },
+    build: {
+      rollupOptions: {
+        onwarn(warning, defaultHandler) {
+          if (warning.code === 'INVALID_ANNOTATION') return
+          defaultHandler(warning)
+        },
+      },
+    },
   }
 })

@@ -89,6 +89,9 @@ importers:
       '@pavilion/vite':
         specifier: workspace:*
         version: link:../../packages/vite
+      '@remix-run/router':
+        specifier: ^1.23.0
+        version: 1.23.3
       '@types/react':
         specifier: ^18.3.0
         version: 18.3.31
@@ -882,7 +885,6 @@ packages:
   /@remix-run/router@1.23.3:
     resolution: {integrity: sha512-4An71tdz9X8+3sI4Qqqd2LWd9vS39J7sqd9EU4Scw7TJE/qB10Flv/UuqbPVgfQV9XoK8Np6jNquZitnZq5i+Q==}
     engines: {node: '>=14.0.0'}
-    dev: false
 
   /@rolldown/pluginutils@1.0.0-beta.27:
     resolution: {integrity: sha512-+d0F4MKMCbeVUJwG96uQ4SgAznZNSq93I3V+9NHA4OpvqG8mRCpGdKmK8l/dl02h2CCDHwW2FqilnTyDcAnqjA==}

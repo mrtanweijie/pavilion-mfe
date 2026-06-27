@@ -80,6 +80,16 @@ export function cssScopePlugin(options: CssScopeOptions): Plugin {
     postcssPlugin: 'pavilion-css-scope',
 
     Rule(rule: Rule) {
+      // Skip keyframe selectors (0%, 100%, from, to) inside @keyframes —
+      // they must not be prefixed like normal selectors
+      const parent = rule.parent
+      if (parent?.type === 'atrule') {
+        const atParent = parent as AtRule
+        if (atParent.name === 'keyframes' || atParent.name === '-webkit-keyframes') {
+          return
+        }
+      }
+
       if (shouldSkip(rule, exclude, include)) return
 
       rule.selectors = rule.selectors.map((sel) => scopeSelector(sel, prefix))

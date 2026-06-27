@@ -13,6 +13,7 @@ export default defineConfig({
       },
       openDevServe: true,
       port: 6030,
+      dts: false,
     }),
   ],
   server: { port: 6030 },

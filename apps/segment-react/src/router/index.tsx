@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react'
 import { createBrowserRouter } from 'react-router-dom'
+import type { Router } from '@remix-run/router'
 
 // ---------- 工具：深设对象路径值 ----------
 function deepSet(obj: Record<string, any>, path: string[], value: any) {
@@ -74,6 +75,6 @@ function generateRouteConfig() {
   ]
 }
 
-export const router = createBrowserRouter(generateRouteConfig(), {
+export const router: Router = createBrowserRouter(generateRouteConfig(), {
   basename: '/react',
 })

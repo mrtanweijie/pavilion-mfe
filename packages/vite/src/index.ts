@@ -20,6 +20,28 @@ export function pavilion(options: PavilionPluginOptions): PluginOption[] {
       if (options.role === 'segment' || options.role === 'runtime') {
         config.base = `${options.cdn ?? ''}/mfe/${options.name ?? 'unknown'}/`
       }
+      // MF shared chunks (e.g. Element Plus ~950kB, Ant Design ~1.5MB)
+      // are single-load shared bundles — raise the limit to avoid noise.
+      const build = config.build ?? (config.build = {})
+      if (!build.chunkSizeWarningLimit) {
+        build.chunkSizeWarningLimit = 1500
+      }
+    },
+  } as PluginOption)
+
+  // ─── 1b. Mark vite/module-runner as external ───
+  // @module-federation/vite dynamically imports it for SSR (Vite 8+),
+  // but it doesn't exist in Vite 5.x. The import is wrapped in try/catch
+  // at runtime, so we just need Rollup to not resolve it at build time.
+  // enforce: 'pre' ensures this runs BEFORE Vite's built-in resolver.
+  plugins.push({
+    name: 'pavilion:external',
+    enforce: 'pre',
+    apply: 'build',
+    resolveId(id) {
+      if (id === 'vite/module-runner') {
+        return { id, external: true }
+      }
     },
   } as PluginOption)
 

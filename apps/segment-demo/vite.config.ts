@@ -15,7 +15,16 @@ export default defineConfig({
       },
       openDevServe: true,
       port: 6020,
+      dts: false,
     }),
   ],
   server: { port: 6020 },
+  build: {
+    rollupOptions: {
+      onwarn(warning, defaultHandler) {
+        if (warning.code === 'INVALID_ANNOTATION') return
+        defaultHandler(warning)
+      },
+    },
+  },
 })
