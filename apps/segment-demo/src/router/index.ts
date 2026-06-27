@@ -21,7 +21,7 @@ const routes = [
     component: () => import('../pages/form.vue'),
   },
   {
-    path: '/:pathMatch(.*)*',
+    path: '/demo/:pathMatch(.*)*',
     redirect: '/demo/list',
   },
 ]

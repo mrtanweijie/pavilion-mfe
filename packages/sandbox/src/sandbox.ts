@@ -1,8 +1,9 @@
 /**
  * Side-effect tracker for micro-frontend segments.
  *
- * Hooks into common side-effect APIs at mount time,
- * cleans up all tracked resources at unmount time.
+ * Uses a module-level stack to support multiple concurrent sandboxes.
+ * Globals are patched once; each side-effect is attributed to the
+ * sandbox on top of the stack at creation time.
  */
 
 interface TrackedListener {
@@ -12,85 +13,107 @@ interface TrackedListener {
   options?: any
 }
 
+// ─── Module-level: original method references ───
+const origSetTimeout = globalThis.setTimeout.bind(globalThis)
+const origSetInterval = globalThis.setInterval.bind(globalThis)
+const origClearTimeout = globalThis.clearTimeout.bind(globalThis)
+const origClearInterval = globalThis.clearInterval.bind(globalThis)
+const origAddEventListener = globalThis.addEventListener.bind(globalThis)
+const origRemoveEventListener = globalThis.removeEventListener.bind(globalThis)
+
+// ─── Module-level: active sandbox stack ───
+const activeStack: Sandbox[] = []
+let globalsPatched = false
+
+function patchGlobals(): void {
+  if (globalsPatched) return
+  globalsPatched = true
+
+  globalThis.setTimeout = ((handler: any, timeout?: any, ...args: any[]) => {
+    const id = origSetTimeout(handler, timeout, ...args) as number
+    const active = activeStack[activeStack.length - 1]
+    if (active) active._timeouts.add(id)
+    return id
+  }) as any
+
+  globalThis.setInterval = ((handler: any, timeout?: any, ...args: any[]) => {
+    const id = origSetInterval(handler, timeout, ...args) as number
+    const active = activeStack[activeStack.length - 1]
+    if (active) active._intervals.add(id)
+    return id
+  }) as any
+
+  globalThis.clearTimeout = ((id: any) => {
+    for (const s of activeStack) s._timeouts.delete(id)
+    origClearTimeout(id)
+  }) as any
+
+  globalThis.clearInterval = ((id: any) => {
+    for (const s of activeStack) s._intervals.delete(id)
+    origClearInterval(id)
+  }) as any
+
+  globalThis.addEventListener = ((type: any, handler: any, options?: any) => {
+    if (handler) {
+      const active = activeStack[activeStack.length - 1]
+      if (active) {
+        active._listeners.push({ target: globalThis, type, handler, options })
+      }
+    }
+    origAddEventListener(type, handler, options)
+  }) as any
+
+  globalThis.removeEventListener = ((type: any, handler: any, options?: any) => {
+    for (const s of activeStack) {
+      s._listeners = s._listeners.filter(
+        (l) => !(l.type === type && l.handler === handler)
+      )
+    }
+    origRemoveEventListener(type, handler, options)
+  }) as any
+}
+
 export class Sandbox {
-  private timeouts: Set<number> = new Set()
-  private intervals: Set<number> = new Set()
-  private listeners: TrackedListener[] = []
+  /** @internal — tracked timeouts created while this sandbox was active */
+  _timeouts: Set<number> = new Set()
+  /** @internal — tracked intervals */
+  _intervals: Set<number> = new Set()
+  /** @internal — tracked event listeners */
+  _listeners: TrackedListener[] = []
+
   private globalKeys: Set<string> = new Set()
   private activated = false
 
-  // Store originals as `any` to avoid TS overload mismatches with runtime overrides
-  private origSetTimeout: any
-  private origSetInterval: any
-  private origClearTimeout: any
-  private origClearInterval: any
-  private origAddEventListener: any
-  private origRemoveEventListener: any
-
-  constructor(public appCode: string) {
-    this.origSetTimeout = globalThis.setTimeout.bind(globalThis)
-    this.origSetInterval = globalThis.setInterval.bind(globalThis)
-    this.origClearTimeout = globalThis.clearTimeout.bind(globalThis)
-    this.origClearInterval = globalThis.clearInterval.bind(globalThis)
-    this.origAddEventListener = globalThis.addEventListener.bind(globalThis)
-    this.origRemoveEventListener = globalThis.removeEventListener.bind(globalThis)
-  }
+  constructor(public appCode: string) {}
 
   activate(): void {
     if (this.activated) return
+    patchGlobals()
+    activeStack.push(this)
     this.activated = true
-
-    globalThis.setTimeout = ((handler: any, timeout?: any, ...args: any[]) => {
-      const id = this.origSetTimeout(handler, timeout, ...args) as number
-      this.timeouts.add(id)
-      return id
-    }) as any
-
-    globalThis.setInterval = ((handler: any, timeout?: any, ...args: any[]) => {
-      const id = this.origSetInterval(handler, timeout, ...args) as number
-      this.intervals.add(id)
-      return id
-    }) as any
-
-    globalThis.clearTimeout = ((id: any) => {
-      this.timeouts.delete(id)
-      this.origClearTimeout(id)
-    }) as any
-
-    globalThis.clearInterval = ((id: any) => {
-      this.intervals.delete(id)
-      this.origClearInterval(id)
-    }) as any
-
-    globalThis.addEventListener = ((type: any, handler: any, options?: any) => {
-      if (handler) {
-        this.listeners.push({ target: globalThis, type, handler, options })
-      }
-      this.origAddEventListener(type, handler, options)
-    }) as any
   }
 
   deactivate(): void {
     if (!this.activated) return
     this.activated = false
 
-    this.timeouts.forEach((id) => this.origClearTimeout(id))
-    this.timeouts.clear()
-    this.intervals.forEach((id) => this.origClearInterval(id))
-    this.intervals.clear()
+    // Remove from active stack
+    const idx = activeStack.lastIndexOf(this)
+    if (idx !== -1) activeStack.splice(idx, 1)
 
-    this.listeners.forEach(({ target, type, handler, options }) => {
-      target.removeEventListener(type, handler, options)
+    // Clean up tracked timers
+    this._timeouts.forEach((id) => origClearTimeout(id))
+    this._timeouts.clear()
+    this._intervals.forEach((id) => origClearInterval(id))
+    this._intervals.clear()
+
+    // Clean up tracked listeners (use original to avoid re-entering the patched fn)
+    this._listeners.forEach(({ type, handler, options }) => {
+      origRemoveEventListener(type, handler, options)
     })
-    this.listeners = []
+    this._listeners = []
 
-    globalThis.setTimeout = this.origSetTimeout
-    globalThis.setInterval = this.origSetInterval
-    globalThis.clearTimeout = this.origClearTimeout
-    globalThis.clearInterval = this.origClearInterval
-    globalThis.addEventListener = this.origAddEventListener
-    globalThis.removeEventListener = this.origRemoveEventListener
-
+    // Clean up tracked global keys
     this.globalKeys.forEach((key) => {
       delete (globalThis as any)[key]
     })

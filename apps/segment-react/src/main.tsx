@@ -21,6 +21,7 @@ export default {
 /** 独立运行时自启动 */
 const rootEl = document.getElementById('root')
 if (rootEl && !(rootEl as any)._reactRootContainer) {
+  rootEl.classList.add('pavilion-react-app')
   const root = createRoot(rootEl)
   root.render(
     <React.StrictMode>

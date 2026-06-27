@@ -35,7 +35,7 @@ export function createRouter(config?: { apps?: SegmentApp[] }) {
 
     const div = document.createElement('div')
     div.id = name
-    div.classList.add(`pavilion-segment-${name}`)
+    div.classList.add(`pavilion-${name}`)
     document.getElementById('pavilion-container')?.appendChild(div)
     return div
   }

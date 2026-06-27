@@ -23,6 +23,7 @@ export default {
 /** 独立运行时自启动 */
 const mountEl = document.getElementById('app')
 if (mountEl && !(mountEl as any).__vue_app__) {
+  mountEl.classList.add('pavilion-demo-app')
   const app = createApp(App)
   app.use(ElementPlus)
   const router = createDemoRouter()
