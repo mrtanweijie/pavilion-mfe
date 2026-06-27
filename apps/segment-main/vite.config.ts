@@ -5,15 +5,16 @@ import { pavilion } from '@pavilion/vite'
 import mfeConfig from './mfe.json'
 
 export default defineConfig(({ command }: ConfigEnv) => {
+  const isServe = command === 'serve'
+  const isBuild = command === 'build'
+
   const remotes: Record<string, string> = {}
-  const pavilionRemotes: Record<string, string> = {}
 
   mfeConfig.apps.forEach((app) => {
-    if (command === 'serve' && app.devPort) {
+    if (isServe && app.devPort) {
       remotes[app.appCode] = `${app.appCode}@http://localhost:${app.devPort}/mf-manifest-main.json`
-    } else {
-      pavilionRemotes[app.appCode] = `${app.appCode}@latest`
     }
+    // build mode: preloadPlugin registers remotes at runtime
   })
 
   return {
@@ -22,8 +23,10 @@ export default defineConfig(({ command }: ConfigEnv) => {
       pavilion({
         role: 'shell',
         name: 'segment-main',
-        remotes: command === 'serve' ? remotes : undefined,
-        pavilionRemotes: command === 'build' ? pavilionRemotes : undefined,
+        remotes: isServe ? remotes : undefined,
+        runtimePlugins: isBuild ? ['./src/preloadPlugin'] : undefined,
+        shared: isBuild ? ['vue'] : undefined,
+        shareStrategy: isBuild ? 'loaded-first' : undefined,
         dts: false,
       }),
     ],

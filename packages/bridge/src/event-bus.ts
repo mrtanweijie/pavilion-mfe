@@ -4,6 +4,7 @@
  */
 
 import type { EventCallback } from './types.js'
+import { bridgeLog } from './logger.js'
 
 interface ListenerEntry {
   callback: EventCallback
@@ -25,6 +26,7 @@ export class EventBus {
       callback,
       appCode: options?.appCode,
     })
+    bridgeLog('event-subscribe', { name: eventName, appCode: options?.appCode ?? '*' })
     return this
   }
 
@@ -42,6 +44,8 @@ export class EventBus {
     const listeners = this.events[eventName]
     if (!listeners) return this
 
+    bridgeLog('event-emit', { name: eventName, listeners: listeners.length })
+
     listeners.forEach((entry) => {
       entry.callback(detail)
     })
@@ -52,6 +56,8 @@ export class EventBus {
   emitToApp(eventName: string, appCode: string, detail?: unknown): this {
     const listeners = this.events[eventName]
     if (!listeners) return this
+
+    bridgeLog('event-emit', { name: eventName, appCode, listeners: listeners.length })
 
     listeners.forEach((entry) => {
       if (entry.appCode === undefined || entry.appCode === appCode) {

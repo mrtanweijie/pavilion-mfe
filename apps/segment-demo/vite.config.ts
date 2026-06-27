@@ -1,8 +1,9 @@
 import { defineConfig } from 'vite'
+import type { ConfigEnv } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { pavilion } from '@pavilion/vite'
 
-export default defineConfig({
+export default defineConfig(({ command }: ConfigEnv) => ({
   plugins: [
     vue(),
     pavilion({
@@ -13,6 +14,7 @@ export default defineConfig({
       },
       pavilionRemotes: {
       },
+      shared: command === 'build' ? ['vue'] : undefined,
       openDevServe: true,
       port: 6020,
       dts: false,
@@ -27,4 +29,4 @@ export default defineConfig({
       },
     },
   },
-})
+}))

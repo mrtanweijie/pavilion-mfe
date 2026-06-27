@@ -8,10 +8,13 @@
  *   .container .title { font-size: 12px; }
  *   @keyframes fade { from { opacity: 0; } }
  *
- * Output (prefix = '.pavilion-dashboard'):
- *   .pavilion-dashboard .card { color: red; }
- *   .pavilion-dashboard .container .title { font-size: 12px; }
+ * Output (prefix = 'pavilion-dashboard'):
+ *   :where(.pavilion-dashboard) .card { color: red; }
+ *   :where(.pavilion-dashboard) .container .title { font-size: 12px; }
  *   @keyframes pavilion-dashboard-fade { from { opacity: 0; } }
+ *
+ * :where() wraps the scope class with zero specificity, so scoped
+ * styles keep the same specificity as the original selectors.
  */
 
 import type { Plugin, Rule, AtRule } from 'postcss'
@@ -24,6 +27,11 @@ export interface CssScopeOptions {
   /** Regex patterns for files that SHOULD be scoped (if empty, scope all) */
   include?: RegExp[]
 }
+
+// ─── Build-time stats ───
+let scopedSelectors = 0
+let skippedSelectors = 0
+let scopedKeyframes = 0
 
 /**
  * Determine if a PostCSS node's source file matches any exclude/include pattern.
@@ -48,29 +56,30 @@ function shouldSkip(
  */
 function scopeSelector(selector: string, prefix: string): string {
   const trimmed = selector.trim()
+  const scope = `:where(.${prefix})`
 
-  // :root → .prefix directly
+  // :root → scope directly
   if (trimmed === ':root' || trimmed === ':root(') {
-    return `.${prefix}`
+    return scope
   }
 
   // ::before, ::after, etc. — pseudo-elements that can't be prefixed
   if (trimmed.startsWith('::')) {
-    return `.${prefix} ${trimmed}`
+    return `${scope} ${trimmed}`
   }
 
   // Already scoped — skip
-  if (trimmed.startsWith(`.${prefix}`)) {
+  if (trimmed.startsWith(scope) || trimmed.startsWith(`.${prefix}`)) {
     return trimmed
   }
 
   // Special selectors that need wrapping, not prefixing
   if (trimmed.startsWith('@') || trimmed.startsWith(':') && !trimmed.startsWith(':where')) {
-    return `.${prefix} ${trimmed}`
+    return `${scope} ${trimmed}`
   }
 
-  // Default: prepend .prefix with space combinator
-  return `.${prefix} ${trimmed}`
+  // Default: prepend scope with space combinator
+  return `${scope} ${trimmed}`
 }
 
 export function cssScopePlugin(options: CssScopeOptions): Plugin {
@@ -90,9 +99,13 @@ export function cssScopePlugin(options: CssScopeOptions): Plugin {
         }
       }
 
-      if (shouldSkip(rule, exclude, include)) return
+      if (shouldSkip(rule, exclude, include)) {
+        skippedSelectors += rule.selectors.length
+        return
+      }
 
       rule.selectors = rule.selectors.map((sel) => scopeSelector(sel, prefix))
+      scopedSelectors += rule.selectors.length
     },
 
     AtRule(atRule: AtRule) {
@@ -104,7 +117,18 @@ export function cssScopePlugin(options: CssScopeOptions): Plugin {
         atRule.name === '-webkit-keyframes'
       ) {
         atRule.params = `${prefix}-${atRule.params}`
+        scopedKeyframes++
       }
+    },
+
+    OnceExit() {
+      console.log(
+        `[Pavilion] CSS scope: prefix=${prefix}  selectors=${scopedSelectors}  skipped=${skippedSelectors}  keyframes=${scopedKeyframes}`
+      )
+      // Reset for next file
+      scopedSelectors = 0
+      skippedSelectors = 0
+      scopedKeyframes = 0
     },
   }
 }

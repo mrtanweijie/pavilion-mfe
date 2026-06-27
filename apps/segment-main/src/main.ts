@@ -2,11 +2,24 @@ import { createApp } from 'vue'
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
-import { createRouter as createPavilionRouter } from '@pavilion/router'
+import { createRouter as createPavilionRouter, configureLog } from '@pavilion/router'
 import { loadRemote } from '@module-federation/runtime'
 import mfeConfig from '../mfe.json'
 import router from './router'
 import App from './App.vue'
+
+// ─── Pavilion log configuration ───
+// Toggle per-module: router | sandbox | preload | bridge
+// Set to false to silence that module's logs.
+configureLog({
+  enabled: true,
+  modules: {
+    router: true,
+    sandbox: true,
+    preload: true,
+    bridge: true,
+  },
+})
 
 const app = createApp(App)
 

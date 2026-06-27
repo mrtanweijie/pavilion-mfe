@@ -6,6 +6,8 @@
  * sandbox on top of the stack at creation time.
  */
 
+import { pavilionLog } from './logger.js'
+
 interface TrackedListener {
   target: EventTarget
   type: string
@@ -25,9 +27,40 @@ const origRemoveEventListener = globalThis.removeEventListener.bind(globalThis)
 const activeStack: Sandbox[] = []
 let globalsPatched = false
 
+/**
+ * Returns the sandbox currently on top of the active stack.
+ * Used by the router to attribute popstate listeners to segments.
+ */
+export function getActiveSandbox(): Sandbox | undefined {
+  return activeStack[activeStack.length - 1]
+}
+
+// ─── Route isolation: popstate listener proxying ───
+
+/**
+ * Route matcher callback — set by the router.
+ * Returns true if the given appCode owns the current route.
+ */
+let routeMatcher: ((appCode: string, path: string) => boolean) | null = null
+
+/**
+ * Maps original handler → proxy handler for popstate listeners.
+ * Allows removeEventListener to translate original → proxy.
+ */
+const popstateProxyMap = new WeakMap<Function, Function>()
+
+/**
+ * Set the route matcher used for popstate isolation.
+ * Called by createRouter during start().
+ */
+export function setRouteMatcher(fn: (appCode: string, path: string) => boolean): void {
+  routeMatcher = fn
+}
+
 function patchGlobals(): void {
   if (globalsPatched) return
   globalsPatched = true
+  pavilionLog('sandbox', 'globals-patch')
 
   globalThis.setTimeout = ((handler: any, timeout?: any, ...args: any[]) => {
     const id = origSetTimeout(handler, timeout, ...args) as number
@@ -57,6 +90,22 @@ function patchGlobals(): void {
     if (handler) {
       const active = activeStack[activeStack.length - 1]
       if (active) {
+        // For popstate listeners with a route matcher, wrap with a proxy
+        // that only fires when the segment owning this listener is active.
+        if (type === 'popstate' && routeMatcher) {
+          const appCode = active.appCode
+          const proxyHandler = (event: Event) => {
+            if (routeMatcher!(appCode, location.pathname)) {
+              handler(event)
+            } else {
+              pavilionLog('sandbox', 'popstate-blocked', { appCode, path: location.pathname })
+            }
+          }
+          popstateProxyMap.set(handler, proxyHandler)
+          active._listeners.push({ target: globalThis, type, handler: proxyHandler, options })
+          origAddEventListener(type, proxyHandler, options)
+          return
+        }
         active._listeners.push({ target: globalThis, type, handler, options })
       }
     }
@@ -64,12 +113,21 @@ function patchGlobals(): void {
   }) as any
 
   globalThis.removeEventListener = ((type: any, handler: any, options?: any) => {
+    // For popstate, translate original handler → proxy if one was created
+    let effectiveHandler = handler
+    if (type === 'popstate') {
+      const proxy = popstateProxyMap.get(handler)
+      if (proxy) {
+        popstateProxyMap.delete(handler)
+        effectiveHandler = proxy
+      }
+    }
     for (const s of activeStack) {
       s._listeners = s._listeners.filter(
-        (l) => !(l.type === type && l.handler === handler)
+        (l) => !(l.type === type && l.handler === effectiveHandler)
       )
     }
-    origRemoveEventListener(type, handler, options)
+    origRemoveEventListener(type, effectiveHandler, options)
   }) as any
 }
 
@@ -91,11 +149,18 @@ export class Sandbox {
     patchGlobals()
     activeStack.push(this)
     this.activated = true
+    pavilionLog('sandbox', 'sandbox-activate', { appCode: this.appCode })
   }
 
   deactivate(): void {
     if (!this.activated) return
     this.activated = false
+
+    // Snapshot cleanup stats before clearing
+    const timers = this._timeouts.size
+    const intervals = this._intervals.size
+    const listeners = this._listeners.length
+    const globals = this.globalKeys.size
 
     // Remove from active stack
     const idx = activeStack.lastIndexOf(this)
@@ -118,6 +183,14 @@ export class Sandbox {
       delete (globalThis as any)[key]
     })
     this.globalKeys.clear()
+
+    pavilionLog('sandbox', 'sandbox-deactivate', {
+      appCode: this.appCode,
+      timers,
+      intervals,
+      listeners,
+      globals,
+    })
   }
 
   trackGlobal(key: string): void {

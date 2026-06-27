@@ -1,5 +1,5 @@
 import type { SegmentApp, RegisteredApp } from './types.js'
-import { Sandbox } from '@pavilion/sandbox'
+import { Sandbox, setRouteMatcher, pavilionLog } from '@pavilion/sandbox'
 
 /**
  * Micro-frontend lifecycle router.
@@ -11,6 +11,16 @@ import { Sandbox } from '@pavilion/sandbox'
  */
 export function createRouter(config?: { apps?: SegmentApp[] }) {
   const apps: RegisteredApp[] = []
+  let prevActiveAppCodes: string[] = []
+
+  /**
+   * Dispatch a Pavilion routing event.
+   * Events: pavilion:before-routing, pavilion:after-routing, pavilion:segment-switch
+   */
+  function dispatch(name: string, detail: Record<string, unknown>): void {
+    pavilionLog('router', name.replace('pavilion:', ''), detail)
+    window.dispatchEvent(new CustomEvent(name, { detail }))
+  }
 
   if (config?.apps) {
     config.apps.forEach((app) => register(app))
@@ -27,6 +37,7 @@ export function createRouter(config?: { apps?: SegmentApp[] }) {
       cleanup: null,
       sandbox: null,
     })
+    pavilionLog('router', 'segment-register', { appCode: app.name })
   }
 
   function getContainer(name: string): HTMLElement {
@@ -48,11 +59,13 @@ export function createRouter(config?: { apps?: SegmentApp[] }) {
   async function loadApp(app: RegisteredApp): Promise<void> {
     if (app.status !== 'NOT_LOADED') return
     app.status = 'LOADING'
+    const t0 = performance.now()
     app.lifecycle = await app.app()
     if (app.lifecycle.bootstrap) {
       await app.lifecycle.bootstrap({ appCode: app.name, basename: '' })
     }
     app.status = 'NOT_MOUNTED'
+    pavilionLog('router', 'segment-load', { appCode: app.name, ms: Math.round(performance.now() - t0) })
   }
 
   async function mountApp(app: RegisteredApp): Promise<void> {
@@ -64,6 +77,7 @@ export function createRouter(config?: { apps?: SegmentApp[] }) {
     sandbox.activate()
     app.sandbox = sandbox
 
+    const t0 = performance.now()
     const lifecycle = app.lifecycle!
     const container = getContainer(app.name)
     container.style.display = 'block'
@@ -74,11 +88,13 @@ export function createRouter(config?: { apps?: SegmentApp[] }) {
     app.container = container
     app.cleanup = cleanup ?? null
     app.status = 'MOUNTED'
+    pavilionLog('router', 'segment-mount', { appCode: app.name, ms: Math.round(performance.now() - t0) })
   }
 
   async function unmountApp(app: RegisteredApp): Promise<void> {
     if (app.status !== 'MOUNTED') return
     app.status = 'UNMOUNTING'
+    const t0 = performance.now()
 
     // Clean up side effects before unmounting
     app.sandbox?.deactivate()
@@ -104,6 +120,7 @@ export function createRouter(config?: { apps?: SegmentApp[] }) {
     // (createRoot / createApp) each time, and bootstrap is one-shot init
     // that only needs to run once.
     app.status = 'NOT_MOUNTED'
+    pavilionLog('router', 'segment-unmount', { appCode: app.name, ms: Math.round(performance.now() - t0) })
   }
 
   async function reroute(): Promise<void> {
@@ -137,18 +154,35 @@ export function createRouter(config?: { apps?: SegmentApp[] }) {
       await Promise.all(appsToLoad.map(loadApp))
       await Promise.all(appsToMount.map(mountApp))
     }
+
+    // Detect segment switch after reroute completes
+    const currentCodes = matchActiveApps().map((a) => a.name).sort()
+    const prevSorted = [...prevActiveAppCodes].sort()
+    if (JSON.stringify(currentCodes) !== JSON.stringify(prevSorted)) {
+      dispatch('pavilion:segment-switch', { from: prevActiveAppCodes, to: currentCodes })
+      prevActiveAppCodes = currentCodes
+    }
   }
 
   function patchHistory(): void {
     const originalPushState = window.history.pushState.bind(window.history)
     const originalReplaceState = window.history.replaceState.bind(window.history)
 
+    function runReroute(trigger: string, url: string): void {
+      dispatch('pavilion:before-routing', { url, trigger })
+      setTimeout(() => {
+        reroute().then(() => {
+          dispatch('pavilion:after-routing', { url, trigger })
+        })
+      }, 0)
+    }
+
     window.history.pushState = function (state, _title, url) {
       const urlBefore = window.location.href
       const result = originalPushState(state, _title, url)
       const urlAfter = window.location.href
       if (urlBefore !== urlAfter) {
-        setTimeout(() => reroute(), 0)
+        runReroute('pushState', urlAfter)
       }
       return result
     } as typeof window.history.pushState
@@ -158,19 +192,37 @@ export function createRouter(config?: { apps?: SegmentApp[] }) {
       const result = originalReplaceState(state, _title, url)
       const urlAfter = window.location.href
       if (urlBefore !== urlAfter) {
-        setTimeout(() => reroute(), 0)
+        runReroute('replaceState', urlAfter)
       }
       return result
     } as typeof window.history.replaceState
 
     window.addEventListener('popstate', () => {
-      setTimeout(() => reroute(), 0)
+      runReroute('popstate', window.location.href)
     })
   }
 
   function start(): void {
+    pavilionLog('router', 'router-start', { segments: apps.length })
+
+    // Set up route isolation: segment popstate listeners only fire when
+    // the segment's route is active. This prevents inactive segments from
+    // processing navigation events intended for other segments.
+    setRouteMatcher((appCode, path) => {
+      return apps.some(
+        (app) => app.name === appCode && app.activeWhen(path)
+      )
+    })
+
     patchHistory()
-    setTimeout(() => reroute(), 0)
+    // Initial route: dispatch events for the first load
+    const url = window.location.href
+    dispatch('pavilion:before-routing', { url, trigger: 'init' })
+    setTimeout(() => {
+      reroute().then(() => {
+        dispatch('pavilion:after-routing', { url, trigger: 'init' })
+      })
+    }, 0)
   }
 
   return {

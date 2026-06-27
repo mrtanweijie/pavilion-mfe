@@ -6,6 +6,8 @@
  * with reactive subscriptions.
  */
 
+import { bridgeLog } from './logger.js'
+
 interface SubscriptionValue<T> {
   value: T | null
   unsubscribe: () => void
@@ -64,6 +66,7 @@ export class StorageSync {
       this.observers[key].push(callback as ObserverCallback<unknown>)
     }
 
+    bridgeLog('storage-subscribe', { key })
     callback(subscription)
     return unsubscribe
   }
@@ -78,6 +81,7 @@ export class StorageSync {
   private publish(key: string, value: unknown): void {
     const list = this.observers[key]
     if (list) {
+      bridgeLog('storage-publish', { key, subscribers: list.length })
       list.forEach((cb) => {
         const subscription: SubscriptionValue<unknown> = {
           value,
