@@ -9,6 +9,9 @@ export type {
   RegisteredApp,
   AppStatus,
   SegmentRouteConfig,
+  RouterConfig,
+  RouterHooks,
+  HookContext,
 } from './types.js'
 
 // Re-export logger from @pavilion/sandbox for convenience

@@ -36,4 +36,7 @@ export interface PavilionPluginOptions extends FederationUserOptions {
 
   /** Dev server proxy rules (dev mode only) */
   proxy?: Record<string, string | ProxyOptions>
+
+  /** Current environment (e.g. 'develop', 'production'). Falls back to VITE_PAVILION_ENV env var. */
+  env?: string
 }

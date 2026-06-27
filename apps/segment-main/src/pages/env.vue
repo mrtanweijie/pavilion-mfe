@@ -37,6 +37,17 @@
     </el-card>
 
     <el-card shadow="hover" style="margin-top: 16px">
+      <template #header><span>环境配置</span></template>
+      <el-descriptions :column="2" border>
+        <el-descriptions-item label="当前环境">
+          <el-tag :type="pavilionEnv === 'production' ? 'danger' : pavilionEnv === 'uat' ? 'warning' : 'success'">{{ pavilionEnv }}</el-tag>
+        </el-descriptions-item>
+        <el-descriptions-item label="API Base">{{ apiBase || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="CDN">{{ cdn || '-' }}</el-descriptions-item>
+      </el-descriptions>
+    </el-card>
+
+    <el-card shadow="hover" style="margin-top: 16px">
       <template #header><span>运行时信息</span></template>
       <el-descriptions :column="2" border>
         <el-descriptions-item label="当前路径">{{ currentPath }}</el-descriptions-item>
@@ -58,6 +69,10 @@ const language = navigator.language
 const online = ref(navigator.onLine)
 
 const tableData = mfeConfig.apps
+
+const pavilionEnv = (import.meta.env.VITE_PAVILION_ENV || 'dev') as string
+const apiBase = (import.meta.env.VITE_BASE_API_URL || '') as string
+const cdn = (import.meta.env.VITE_PAVILION_CDN || '') as string
 </script>
 
 <style scoped>

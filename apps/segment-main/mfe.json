@@ -1,10 +1,9 @@
 {
-  "cdn": "https://cdn.example.com",
-  "testDomain": "https://api.example.com",
   "apps": [
     {
       "appCode": "demo-app",
       "name": "Demo (Vue)",
+      "cdn": "",
       "routes": ["/demo"],
       "devPort": 6020,
       "keepAlive": true,
@@ -17,6 +16,7 @@
     {
       "appCode": "react-app",
       "name": "Demo (React)",
+      "cdn": "",
       "routes": ["/react"],
       "devPort": 6030,
       "children": [

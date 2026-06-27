@@ -13,13 +13,26 @@ export type * from './config-types.js'
 export function pavilion(options: PavilionPluginOptions): PluginOption[] {
   const plugins: PluginOption[] = []
 
+  // ─── 0. Resolve environment config ───
+  const env = options.env ?? process.env.VITE_PAVILION_ENV ?? 'develop'
+  const cdn = options.cdn ?? ''
+
+  // ─── 0b. Inject env vars into import.meta.env ───
+  plugins.push({
+    name: 'pavilion:env-inject',
+    config: (config) => {
+      const define = config.define ?? (config.define = {})
+      ;(define as Record<string, string>)['import.meta.env.VITE_PAVILION_ENV'] = JSON.stringify(env)
+    },
+  } as PluginOption)
+
   // ─── 1. Build config: base URL + optimizations ───
   plugins.push({
     name: 'pavilion:build-config',
     apply: 'build',
     config: (config) => {
       if (options.role === 'segment' || options.role === 'runtime') {
-        config.base = `${options.cdn ?? ''}/mfe/${options.name ?? 'unknown'}/`
+        config.base = `${cdn}/mfe/${options.name ?? 'unknown'}/`
       }
 
       // MF shared chunks (e.g. Element Plus ~950kB, Ant Design ~1.5MB)
@@ -104,7 +117,7 @@ export function pavilion(options: PavilionPluginOptions): PluginOption[] {
   }
 
   if (options.pavilionRemotes && Object.keys(options.pavilionRemotes).length > 0) {
-    const resolved = resolveRemotes(options.pavilionRemotes)
+    const resolved = resolveRemotes(options.pavilionRemotes, { cdn })
     mfOptions.remotes = { ...resolved, ...options.remotes }
   } else if (options.remotes && Object.keys(options.remotes).length > 0) {
     mfOptions.remotes = options.remotes

@@ -36,6 +36,7 @@ interface MfeApp {
   appCode: string
   name: string
   routes: string[]
+  cdn?: string
 }
 
 const apps: MfeApp[] = mfeConfig.apps
@@ -111,12 +112,17 @@ export default function () {
      * This replaces static `pavilionRemotes` / `remotes` in vite.config.ts.
      */
     beforeInit(args: any) {
+      const globalCdn = (import.meta.env.VITE_PAVILION_CDN || '') as string
       args.options.remotes.push(
-        ...apps.map((app) => ({
-          name: app.appCode,
-          entry: `/mfe/${app.appCode}/mf-manifest-main.json`,
-          type: 'module' as const,
-        }))
+        ...apps.map((app) => {
+          const appCdn = app.cdn || globalCdn
+          const base = appCdn ? `${appCdn}` : ''
+          return {
+            name: app.appCode,
+            entry: `${base}/mfe/${app.appCode}/mf-manifest-main.json`,
+            type: 'module' as const,
+          }
+        })
       )
       preloadLog('register', {
         remotes: apps.length,

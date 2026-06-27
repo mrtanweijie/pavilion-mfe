@@ -8,6 +8,8 @@ export interface SegmentApp {
   basename?: string
   /** Keep this segment's framework instance alive when unmounted (display:none only) */
   keepAlive?: boolean
+  /** Max cached pages for this segment (overrides global maxCache). Default: unlimited */
+  maxCache?: number
 }
 
 export interface SegmentLifecycle {
@@ -52,4 +54,38 @@ export interface RegisteredApp {
 export interface SegmentRouteConfig {
   name: string
   routes: string[]
+}
+
+// ─── Router configuration ───
+
+/** Hook context passed to router lifecycle hooks */
+export interface HookContext {
+  appCode: string
+  basename: string
+  path: string
+  trigger: 'init' | 'pushState' | 'replaceState' | 'popstate'
+  ms?: number
+  error?: unknown
+}
+
+/** Lifecycle hooks for external APM / observability integration */
+export interface RouterHooks {
+  beforeLoad?: (ctx: HookContext) => void
+  afterLoad?: (ctx: HookContext) => void
+  beforeMount?: (ctx: HookContext) => void
+  afterMount?: (ctx: HookContext) => void
+  beforeUnmount?: (ctx: HookContext) => void
+  afterUnmount?: (ctx: HookContext) => void
+  beforeCache?: (ctx: HookContext) => void
+  afterRestore?: (ctx: HookContext) => void
+  onError?: (ctx: HookContext) => void
+}
+
+/** Configuration for createRouter */
+export interface RouterConfig {
+  apps?: SegmentApp[]
+  /** Global max cached segments (LRU eviction). Default: 5 */
+  maxCache?: number
+  /** Lifecycle hooks for external monitoring */
+  hooks?: RouterHooks
 }

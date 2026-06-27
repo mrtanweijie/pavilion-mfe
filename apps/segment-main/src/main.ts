@@ -21,6 +21,23 @@ configureLog({
   },
 })
 
+// ─── Pavilion config info ───
+const appCode = import.meta.env.VITE_PAVILION_APP_CODE
+const pavilionEnv = import.meta.env.VITE_PAVILION_ENV || 'develop'
+const apiBase = import.meta.env.VITE_BASE_API_URL || ''
+const cdn = import.meta.env.VITE_PAVILION_CDN || ''
+
+const ST_PX = 'color:#42b883;font-weight:bold'
+const ST_KEY = 'color:#999'
+const ST_VAL = 'color:#00b4d8;font-weight:bold'
+console.log(
+  '%c[Pavilion 微前端]%c %s\n  %cenv%c %s  %capi%c %s  %ccdn%c %s',
+  ST_PX, '', appCode,
+  ST_KEY, ST_VAL, pavilionEnv,
+  ST_KEY, ST_VAL, apiBase || '-',
+  ST_KEY, ST_VAL, cdn || '(relative)',
+)
+
 const app = createApp(App)
 
 // 注册 Vue Router
@@ -38,6 +55,7 @@ app.mount('#app')
 
 // 启动 Pavilion 微前端路由
 const pavilionRouter = createPavilionRouter({
+  maxCache: 5,
   apps: mfeConfig.apps.map((seg) => ({
     name: seg.appCode,
     load: async () => {

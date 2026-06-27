@@ -1,4 +1,4 @@
-import type { SegmentApp, RegisteredApp } from './types.js'
+import type { SegmentApp, RegisteredApp, RouterConfig, RouterHooks, HookContext } from './types.js'
 import { Sandbox, setRouteMatcher, pavilionLog } from '@pavilion/sandbox'
 
 /**
@@ -9,20 +9,38 @@ import { Sandbox, setRouteMatcher, pavilionLog } from '@pavilion/sandbox'
  * for multiple segment apps based on URL path matching.
  * Attaches Sandbox isolation on mount, cleans up on unmount.
  */
-export function createRouter(config?: { apps?: SegmentApp[] }) {
+export function createRouter(config?: RouterConfig) {
   const apps: RegisteredApp[] = []
   let prevActiveAppCodes: string[] = []
+  const maxCache = config?.maxCache ?? 5
+  const hooks: RouterHooks | undefined = config?.hooks
 
-  // Track keep-alive preference per app
-  const keepAliveMap = new Map<string, boolean>()
+  // Track keep-alive preference and cache metadata per app
+  const keepAliveMap = new Map<string, { keepAlive: boolean; maxCache?: number; cachedAt: number }>()
 
   /**
    * Dispatch a Pavilion routing event.
-   * Events: pavilion:before-routing, pavilion:after-routing, pavilion:segment-switch
+   * Events: pavilion:before-routing, pavilion:after-routing, pavilion:segment-switch,
+   *         pavilion:before-cache, pavilion:after-restore, pavilion:segment-error
    */
   function dispatch(name: string, detail: Record<string, unknown>): void {
     pavilionLog('router', name.replace('pavilion:', ''), detail)
     window.dispatchEvent(new CustomEvent(name, { detail }))
+  }
+
+  /** Build a HookContext for the current routing trigger */
+  let currentTrigger: HookContext['trigger'] = 'init'
+  let currentPath = ''
+
+  function makeHookCtx(app: RegisteredApp, ms?: number, error?: unknown): HookContext {
+    return {
+      appCode: app.name,
+      basename: app.basename,
+      path: currentPath || window.location.pathname,
+      trigger: currentTrigger,
+      ms,
+      error,
+    }
   }
 
   if (config?.apps) {
@@ -41,7 +59,11 @@ export function createRouter(config?: { apps?: SegmentApp[] }) {
       cleanup: null,
       sandbox: null,
     })
-    keepAliveMap.set(app.name, app.keepAlive ?? false)
+    keepAliveMap.set(app.name, {
+      keepAlive: app.keepAlive ?? false,
+      maxCache: app.maxCache,
+      cachedAt: 0,
+    })
     pavilionLog('router', 'segment-register', { appCode: app.name, keepAlive: app.keepAlive ?? false, basename: app.basename ?? '' })
   }
 
@@ -65,12 +87,23 @@ export function createRouter(config?: { apps?: SegmentApp[] }) {
     if (app.status !== 'NOT_LOADED') return
     app.status = 'LOADING'
     const t0 = performance.now()
-    app.lifecycle = await app.app()
-    if (app.lifecycle.bootstrap) {
-      await app.lifecycle.bootstrap({ appCode: app.name, basename: '' })
+    hooks?.beforeLoad?.(makeHookCtx(app))
+    try {
+      app.lifecycle = await app.app()
+      if (app.lifecycle.bootstrap) {
+        await app.lifecycle.bootstrap({ appCode: app.name, basename: '' })
+      }
+      app.status = 'NOT_MOUNTED'
+      const ms = Math.round(performance.now() - t0)
+      pavilionLog('router', 'segment-load', { appCode: app.name, ms })
+      hooks?.afterLoad?.(makeHookCtx(app, ms))
+    } catch (err) {
+      const ms = Math.round(performance.now() - t0)
+      pavilionLog('router', 'segment-error', { appCode: app.name, phase: 'load', error: String(err) })
+      dispatch('pavilion:segment-error', { appCode: app.name, phase: 'load', error: String(err), ms })
+      hooks?.onError?.(makeHookCtx(app, ms, err))
+      app.status = 'NOT_LOADED'
     }
-    app.status = 'NOT_MOUNTED'
-    pavilionLog('router', 'segment-load', { appCode: app.name, ms: Math.round(performance.now() - t0) })
   }
 
   /**
@@ -79,6 +112,7 @@ export function createRouter(config?: { apps?: SegmentApp[] }) {
    */
   async function restoreApp(app: RegisteredApp): Promise<void> {
     if (app.status !== 'CACHED') return
+    hooks?.beforeMount?.(makeHookCtx(app))
     // Sandbox was kept alive — popstate proxy will now pass events through
     // since the segment's route is active again.
     if (app.container) {
@@ -86,6 +120,8 @@ export function createRouter(config?: { apps?: SegmentApp[] }) {
     }
     app.status = 'MOUNTED'
     pavilionLog('router', 'segment-restore', { appCode: app.name })
+    dispatch('pavilion:after-restore', { appCode: app.name })
+    hooks?.afterRestore?.(makeHookCtx(app))
   }
 
   async function mountApp(app: RegisteredApp): Promise<void> {
@@ -98,6 +134,7 @@ export function createRouter(config?: { apps?: SegmentApp[] }) {
     app.sandbox = sandbox
 
     const t0 = performance.now()
+    hooks?.beforeMount?.(makeHookCtx(app))
     const lifecycle = app.lifecycle!
     const container = getContainer(app.name)
     container.style.display = 'block'
@@ -108,17 +145,73 @@ export function createRouter(config?: { apps?: SegmentApp[] }) {
     app.container = container
     app.cleanup = cleanup ?? null
     app.status = 'MOUNTED'
-    pavilionLog('router', 'segment-mount', { appCode: app.name, ms: Math.round(performance.now() - t0) })
+    const ms = Math.round(performance.now() - t0)
+    pavilionLog('router', 'segment-mount', { appCode: app.name, ms })
+    hooks?.afterMount?.(makeHookCtx(app, ms))
+  }
+
+  /**
+   * Evict the oldest CACHED segment when cache is full (LRU).
+   * Called before caching a new segment.
+   */
+  function evictLRU(): void {
+    const cachedApps = apps.filter((a) => a.status === 'CACHED')
+    if (cachedApps.length < maxCache) return
+
+    // Find the oldest cached app by cachedAt
+    let oldest = cachedApps[0]
+    let oldestTime = keepAliveMap.get(oldest.name)?.cachedAt ?? 0
+    for (const a of cachedApps) {
+      const t = keepAliveMap.get(a.name)?.cachedAt ?? 0
+      if (t < oldestTime) {
+        oldest = a
+        oldestTime = t
+      }
+    }
+
+    // Full unmount the evicted app
+    pavilionLog('router', 'segment-evict', { appCode: oldest.name, reason: 'LRU' })
+    oldest.sandbox?.deactivate()
+    oldest.sandbox = null
+    if (oldest.cleanup) {
+      oldest.cleanup()
+      oldest.cleanup = null
+    }
+    const lifecycle = oldest.lifecycle!
+    if (lifecycle.unmount && oldest.container) {
+      lifecycle.unmount({ appCode: oldest.name, basename: '' }, oldest.container)
+    }
+    if (oldest.container) {
+      oldest.container.style.display = 'none'
+    }
+    oldest.status = 'NOT_MOUNTED'
+    const meta = keepAliveMap.get(oldest.name)
+    if (meta) meta.cachedAt = 0
   }
 
   async function unmountApp(app: RegisteredApp): Promise<void> {
     if (app.status !== 'MOUNTED') return
     app.status = 'UNMOUNTING'
     const t0 = performance.now()
+    const meta = keepAliveMap.get(app.name)
+    const useKeepAlive = meta?.keepAlive ?? false
 
-    const useKeepAlive = keepAliveMap.get(app.name) ?? false
+    hooks?.beforeUnmount?.(makeHookCtx(app))
 
     if (useKeepAlive) {
+      // Check cache limit before caching
+      const perAppMax = meta?.maxCache
+      if (perAppMax !== undefined) {
+        // Per-app max: count cached instances of this same app
+        const thisAppCached = apps.filter((a) => a.name === app.name && a.status === 'CACHED').length
+        if (thisAppCached >= perAppMax) {
+          // Evict oldest instance of this app
+        }
+      } else {
+        // Global LRU eviction
+        evictLRU()
+      }
+
       // Keep-alive: hide container, retain framework instance + DOM + sandbox.
       // Do NOT deactivate sandbox — the popstate proxy will block events
       // when the segment's route is inactive, and pass them through when
@@ -128,7 +221,12 @@ export function createRouter(config?: { apps?: SegmentApp[] }) {
         app.container.style.display = 'none'
       }
       app.status = 'CACHED'
-      pavilionLog('router', 'segment-cache', { appCode: app.name, ms: Math.round(performance.now() - t0) })
+      if (meta) meta.cachedAt = Date.now()
+      const ms = Math.round(performance.now() - t0)
+      pavilionLog('router', 'segment-cache', { appCode: app.name, ms })
+      dispatch('pavilion:before-cache', { appCode: app.name })
+      hooks?.beforeCache?.(makeHookCtx(app, ms))
+      hooks?.afterUnmount?.(makeHookCtx(app, ms))
       return
     }
 
@@ -152,7 +250,38 @@ export function createRouter(config?: { apps?: SegmentApp[] }) {
       app.container.style.display = 'none'
     }
     app.status = 'NOT_MOUNTED'
-    pavilionLog('router', 'segment-unmount', { appCode: app.name, ms: Math.round(performance.now() - t0) })
+    const ms = Math.round(performance.now() - t0)
+    pavilionLog('router', 'segment-unmount', { appCode: app.name, ms })
+    hooks?.afterUnmount?.(makeHookCtx(app, ms))
+  }
+
+  /**
+   * Manually clear cached segments.
+   * @param name - If provided, clears only the specified segment; otherwise clears all.
+   */
+  function clearCache(name?: string): void {
+    const cachedApps = apps.filter(
+      (a) => a.status === 'CACHED' && (!name || a.name === name)
+    )
+    for (const app of cachedApps) {
+      app.sandbox?.deactivate()
+      app.sandbox = null
+      if (app.cleanup) {
+        app.cleanup()
+        app.cleanup = null
+      }
+      const lifecycle = app.lifecycle!
+      if (lifecycle.unmount && app.container) {
+        lifecycle.unmount({ appCode: app.name, basename: '' }, app.container)
+      }
+      if (app.container) {
+        app.container.style.display = 'none'
+      }
+      app.status = 'NOT_MOUNTED'
+      const meta = keepAliveMap.get(app.name)
+      if (meta) meta.cachedAt = 0
+      pavilionLog('router', 'segment-clear-cache', { appCode: app.name })
+    }
   }
 
   async function reroute(): Promise<void> {
@@ -204,12 +333,14 @@ export function createRouter(config?: { apps?: SegmentApp[] }) {
     const originalPushState = window.history.pushState.bind(window.history)
     const originalReplaceState = window.history.replaceState.bind(window.history)
 
-    function runReroute(trigger: string, url: string): void {
+    function runReroute(trigger: HookContext['trigger'], url: string): void {
       // Parse path from url for route-guard detail
       let path = url
       try {
         path = new URL(url, location.origin).pathname
       } catch { /* url is already a path */ }
+      currentTrigger = trigger
+      currentPath = path
       const activeApps = matchActiveApps()
       const appCode = activeApps.length > 0 ? activeApps[0].name : ''
       dispatch('pavilion:before-routing', { url, trigger, path, appCode })
@@ -246,7 +377,7 @@ export function createRouter(config?: { apps?: SegmentApp[] }) {
   }
 
   function start(): void {
-    pavilionLog('router', 'router-start', { segments: apps.length })
+    pavilionLog('router', 'router-start', { segments: apps.length, maxCache })
 
     // Set up route isolation: segment popstate listeners only fire when
     // the segment's route is active. This prevents inactive segments from
@@ -261,6 +392,8 @@ export function createRouter(config?: { apps?: SegmentApp[] }) {
     // Initial route: dispatch events for the first load
     const url = window.location.href
     const initPath = window.location.pathname
+    currentTrigger = 'init'
+    currentPath = initPath
     const initApps = matchActiveApps()
     const initAppCode = initApps.length > 0 ? initApps[0].name : ''
     dispatch('pavilion:before-routing', { url, trigger: 'init', path: initPath, appCode: initAppCode })
@@ -275,6 +408,7 @@ export function createRouter(config?: { apps?: SegmentApp[] }) {
     register,
     start,
     reroute,
+    clearCache,
     getApps: () => apps,
   }
 }
