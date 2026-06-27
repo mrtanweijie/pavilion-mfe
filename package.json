@@ -1,0 +1,16 @@
+{
+  "name": "pavilion-monorepo",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --parallel -r dev",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck"
+  },
+  "engines": {
+    "node": ">=18",
+    "pnpm": ">=8"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0"
+  }
+}

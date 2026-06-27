@@ -1,0 +1,30 @@
+import type { PluginOption } from 'vite'
+
+export interface FederationUserOptions {
+  name?: string
+  exposes?: Record<string, string>
+  remotes?: Record<string, string>
+  shared?: string[]
+  shareStrategy?: 'loaded-first' | 'version-first'
+  runtimePlugins?: string[]
+  manifest?: boolean | { fileName?: string; filePath?: string }
+}
+
+export interface PavilionPluginOptions extends FederationUserOptions {
+  role: 'shell' | 'segment' | 'runtime' | 'login'
+
+  /** pkg@version → resolves to CDN manifest URL */
+  pavilionRemotes?: Record<string, string>
+
+  /** Build-time CDN base URL */
+  cdn?: string
+
+  /** Dev server port (used for WS discovery) */
+  port?: number
+
+  /** Enable dev-time WS port discovery */
+  openDevServe?: boolean
+
+  /** CSS scope: files to exclude from prefixing */
+  cssExclude?: RegExp[]
+}

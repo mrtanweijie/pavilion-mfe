@@ -1,0 +1,26 @@
+{
+  "cdn": "https://cdn.example.com",
+  "testDomain": "https://api.example.com",
+  "apps": [
+    {
+      "appCode": "demo-app",
+      "name": "Demo (Vue)",
+      "routes": ["/demo"],
+      "devPort": 6020,
+      "children": [
+        { "name": "列表页", "route": "/demo/list" },
+        { "name": "详情页", "route": "/demo/detail" }
+      ]
+    },
+    {
+      "appCode": "react-app",
+      "name": "Demo (React)",
+      "routes": ["/react"],
+      "devPort": 6030,
+      "children": [
+        { "name": "列表页", "route": "/react/list" },
+        { "name": "详情页", "route": "/react/detail" }
+      ]
+    }
+  ]
+}

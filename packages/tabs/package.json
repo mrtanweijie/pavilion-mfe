@@ -1,0 +1,36 @@
+{
+  "name": "@pavilion/tabs",
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./vue": {
+      "import": "./src/vue-plugin.ts",
+      "types": "./dist/vue-plugin.d.ts"
+    },
+    "./react": {
+      "import": "./src/react-provider.ts",
+      "types": "./dist/react-provider.d.ts"
+    }
+  },
+  "files": ["dist", "src"],
+  "scripts": {
+    "dev": "tsc --watch",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "vue": "^3.4.0"
+  },
+  "peerDependenciesMeta": {
+    "vue": {
+      "optional": true
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

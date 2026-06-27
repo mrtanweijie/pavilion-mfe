@@ -1,0 +1,63 @@
+{
+    "env": {
+        "ANTHROPIC_BASE_URL": "https://api.deepseek.com/anthropic",
+        "ANTHROPIC_AUTH_TOKEN": "<your-deepseek-api-key>",
+        "ANTHROPIC_MODEL": "deepseek-v4-pro",
+        "ANTHROPIC_DEFAULT_OPUS_MODEL": "deepseek-v4-pro",
+        "ANTHROPIC_DEFAULT_SONNET_MODEL": "deepseek-v4-pro",
+        "ANTHROPIC_DEFAULT_HAIKU_MODEL": "deepseek-v4-flash",
+        "CLAUDE_CODE_SUBAGENT_MODEL": "deepseek-v4-flash",
+        "CLAUDE_CODE_EFFORT_LEVEL": "max"
+    },
+    "permissions": {
+        "allow": [
+            "Read(**/*.{js,ts,jsx,tsx,vue,py,go,rs,java,kt,swift,less,css,scss,html})",
+            "Read(**/*.{json,yaml,yml,toml,xml,config,conf,nginx})",
+            "Read(**/*.md)",
+            "Read(**/*.{png,jpg,jpeg,gif,svg,ico,webp})",
+            "Edit(**/*.{js,ts,jsx,tsx,vue,py,go,rs,java,kt,swift,less,css,scss,html})",
+            "Edit(**/*.{json,yaml,yml,toml,xml,config,conf,nginx})",
+            "Edit(**/*.md)",
+            "Write(**/*.{js,ts,jsx,tsx,vue,py,go,rs,java,kt,swift,less,css,scss,html})",
+            "Write(**/*.{json,yaml,yml,toml,xml,config,conf,nginx})",
+            "Write(**/*.md)",
+            "Glob(**/*)",
+            "Grep(**)",
+            "Bash(git:*)",
+            "Bash(ls:*)",
+            "Bash(pwd:*)",
+            "Bash(which:*)",
+            "Bash(find:*)",
+            "Bash(mkdir:*)",
+            "Bash(cp:*)",
+            "Bash(mv:*)",
+            "Bash(echo:*)",
+            "Bash(node:*)",
+            "Bash(npm:*)",
+            "Bash(pnpm:*)",
+            "Bash(yarn:*)",
+            "Bash(npx:*)",
+            "Bash(umi:*)",
+            "Bash(cross-env:*)",
+            "Bash(turbo:*)",
+            "Bash(cat:*)",
+            "Bash(head:*)",
+            "Bash(tail:*)",
+            "Bash(wc:*)",
+            "WebFetch",
+            "WebSearch"
+        ],
+        "deny": [
+            "Bash(rm -rf /*)",
+            "Bash(rm -rf ~)",
+            "Bash(sudo:*)",
+            "Read(**/.env)",
+            "Read(**/.env.*)",
+            "Read(**/.ssh/**)",
+            "Read(**/*.key)",
+            "Read(**/*.pem)",
+            "Read(**/credentials)",
+            "Read(**/secrets)"
+        ]
+    }
+}

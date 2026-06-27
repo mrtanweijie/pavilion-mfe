@@ -1,0 +1,20 @@
+{
+  "name": "@pavilion/runtime",
+  "version": "0.1.0",
+  "description": "Pavilion shared runtime — designed to be a Module Federation remote",
+  "type": "module",
+  "files": ["dist"],
+  "scripts": {
+    "dev": "tsc --watch",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@pavilion/router": "workspace:*",
+    "@pavilion/bridge": "workspace:*",
+    "@pavilion/sandbox": "workspace:*"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
