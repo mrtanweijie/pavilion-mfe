@@ -1,6 +1,10 @@
 <template>
-  <img src="/pavilion-mfe-logo.svg" class="logo-icon" alt="logo" />
+  <img :src="logoSvg" class="logo-icon" alt="logo" />
 </template>
+
+<script setup lang="ts">
+import logoSvg from './pavilion-mfe-logo.svg'
+</script>
 
 <style scoped>
 .logo-icon {
