@@ -61,24 +61,24 @@ function mapPathConfigToRoute(cfg: Record<string, unknown>): any[] {
 }
 
 /**
- * In Shell mode: redirect to the Shell's /404 page via replaceState +
- * synthetic popstate (triggers PavilionMfe router to unmount this segment
- * and Shell's router to render the 404 page).
+ * In main-app mode: redirect to the main app's /404 page via replaceState +
+ * synthetic popstate (triggers PavilionMfe router to unmount this sub-app
+ * and main app's router to render the 404 page).
  * Uses useLayoutEffect to fire before browser paint, preventing the
- * user from briefly seeing the segment's App.tsx heading.
- * In standalone mode: render the segment's own 404 component.
+ * user from briefly seeing the sub-app's App.tsx heading.
+ * In standalone mode: render the sub-app's own 404 component.
  */
-function RedirectToShell404({ fallback }: { fallback?: React.ReactNode }) {
-  const isShell = !!window.__PAVILION_MFE_ENV__
+function RedirectToMainApp404({ fallback }: { fallback?: React.ReactNode }) {
+  const isMainApp = !!window.__PAVILION_MFE_ENV__
 
   useLayoutEffect(() => {
-    if (isShell) {
+    if (isMainApp) {
       window.history.replaceState(null, '', '/404')
       window.dispatchEvent(new PopStateEvent('popstate', { state: null }))
     }
-  }, [isShell])
+  }, [isMainApp])
 
-  if (isShell) return null
+  if (isMainApp) return null
   return <>{fallback}</>
 }
 
@@ -92,19 +92,19 @@ export function generateRouteConfig() {
     },
     {
       path: '*',
-      element: <RedirectToShell404 fallback={wrapSuspense(notFound as GlobImporter)} />,
+      element: <RedirectToMainApp404 fallback={wrapSuspense(notFound as GlobImporter)} />,
     },
   ]
 }
 
 /**
- * Create a browser router for segment mode (inside Shell).
+ * Create a browser router for sub-app mode (inside main app).
  * Called inside mount() where the Sandbox is already active,
  * so popstate listeners are properly isolated — they only fire
- * when the segment's route is active, preventing basename
- * mismatch warnings when navigating to other segments.
+ * when the sub-app's route is active, preventing basename
+ * mismatch warnings when navigating to other sub-apps.
  */
-export function createSegmentRouter(basename: string = '/react'): Router {
+export function createSubAppRouter(basename: string = '/react'): Router {
   return createBrowserRouter(generateRouteConfig(), {
     basename,
   })

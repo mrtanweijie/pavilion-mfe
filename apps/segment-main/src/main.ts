@@ -56,24 +56,24 @@ app.mount('#app')
 // 启动 PavilionMfe 微前端路由
 const pavilionMfeRouter = createPavilionMfeRouter({
   maxCache: 5,
-  apps: mfeConfig.apps.map((seg) => ({
-    name: seg.appCode,
+  apps: mfeConfig.apps.map((app) => ({
+    name: app.appCode,
     load: async () => {
       try {
-        const mod = await loadRemote(`${seg.appCode}/main`) as any
+        const mod = await loadRemote(`${app.appCode}/main`) as any
         return (mod as any).default ?? mod
       } catch (err) {
-        console.error(`[PavilionMfe] Failed to load ${seg.appCode}:`, err)
+        console.error(`[PavilionMfe] Failed to load ${app.appCode}:`, err)
         return {
           mount: async (_ctx: any, el: HTMLElement) => {
-            el.innerHTML = `<p style="color:#999;">${seg.name} 未加载</p>`
+            el.innerHTML = `<p style="color:#999;">${app.name} 未加载</p>`
           },
         }
       }
     },
-    activeWhen: createPathMatcher(seg.routes),
-    basename: seg.routes[0] ?? '',
-    keepAlive: seg.keepAlive ?? false,
+    activeWhen: createPathMatcher(app.routes),
+    basename: app.routes[0] ?? '',
+    keepAlive: app.keepAlive ?? false,
   })),
 })
 

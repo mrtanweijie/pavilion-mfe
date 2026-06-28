@@ -22,7 +22,7 @@
         <template #title>首页</template>
       </el-menu-item>
 
-      <!-- 微前端段（从 mfe.json 动态生成） -->
+      <!-- 微前端子应用（从 mfe.json 动态生成） -->
       <el-sub-menu v-for="seg in apps" :key="seg.appCode" :index="seg.appCode">
         <template #title>
           <el-icon><component :is="segIcon(seg.appCode)" /></el-icon>
@@ -91,19 +91,19 @@ const router = useRouter()
 const apps = mfeConfig.apps
 const isCollapse = ref(false)
 
-/** 壳自有路由列表 */
-const shellPaths = ['/', '/test', '/env', '/403', '/404']
+/** 主应用自有路由列表 */
+const mainAppPaths = ['/', '/test', '/env', '/403', '/404']
 
 /** el-menu 选中回调 */
 function handleSelect(index: string) {
-  if (shellPaths.includes(index)) {
+  if (mainAppPaths.includes(index)) {
     router.push(index)
   } else {
     navigateTo(index)
   }
 }
 
-/** 段图标映射 */
+/** 子应用图标映射 */
 function segIcon(appCode: string) {
   const map: Record<string, any> = {
     'demo-app': Grid,

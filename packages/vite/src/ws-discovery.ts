@@ -2,8 +2,8 @@
  * Vite plugin for dev-server port discovery via WebSocket.
  * Extracted from chagee's vite-plugin-serve-ports-ws.
  *
- * Each segment dev server registers its port with a central WS service,
- * so the Shell can auto-discover locally running segments.
+ * Each sub-app dev server registers its port with a central WS service,
+ * so the main app can auto-discover locally running sub-apps.
  */
 
 import type { Plugin } from 'vite'
@@ -53,7 +53,7 @@ export function wsDiscoveryPlugin(options: {
     async configureServer(server) {
       const resolvedPort = server.config.server.port ?? 5173
       if (!serverPort) serverPort = resolvedPort
-      if (!options.name) options.name = `segment-${resolvedPort}`
+      if (!options.name) options.name = `sub-app-${resolvedPort}`
 
       server.httpServer?.once('listening', async () => {
         try {

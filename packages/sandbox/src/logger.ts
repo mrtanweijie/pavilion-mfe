@@ -13,7 +13,7 @@
  * Output format (colorized in browser DevTools):
  *   [PavilionMfe] router    before-routing   trigger=pushState  url=/demo/list
  *   [PavilionMfe] sandbox   activate         appCode=demo-app
- *   [PavilionMfe] router    segment-switch   demo-app → react-app
+ *   [PavilionMfe] router    sub-app-switch   demo-app → react-app
  */
 
 export type LogModule = 'router' | 'sandbox' | 'preload' | 'bridge'
@@ -90,8 +90,8 @@ export function pavilionMfeLog(
 ): void {
   if (!isLogEnabled(module)) return
 
-  // Special format for segment-switch (uses → arrow)
-  if (event === 'segment-switch') {
+  // Special format for sub-app-switch (uses → arrow)
+  if (event === 'sub-app-switch') {
     const from = detail.from as string[] | undefined
     const to = detail.to as string[] | undefined
     console.log(

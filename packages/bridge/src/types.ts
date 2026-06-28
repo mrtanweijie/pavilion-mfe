@@ -1,18 +1,18 @@
 /** Built-in PavilionMfe routing events dispatched by createRouter.
  *  These match the event names used by window.dispatchEvent in create-router.ts. */
 export enum MFEEvent {
-  /** Fired before shell routing (pushState/replaceState/popstate/init) */
+  /** Fired before main-app routing (pushState/replaceState/popstate/init) */
   BEFORE_ROUTING = 'pavilion-mfe:before-routing',
-  /** Fired after shell routing completes */
+  /** Fired after main-app routing completes */
   AFTER_ROUTING = 'pavilion-mfe:after-routing',
-  /** Fired when switching from one segment to another */
-  SEGMENT_SWITCH = 'pavilion-mfe:segment-switch',
-  /** Fired before a segment is cached (keep-alive) */
+  /** Fired when switching from one sub-app to another */
+  SUB_APP_SWITCH = 'pavilion-mfe:sub-app-switch',
+  /** Fired before a sub-app is cached (keep-alive) */
   BEFORE_CACHE = 'pavilion-mfe:before-cache',
-  /** Fired after a cached segment is restored */
+  /** Fired after a cached sub-app is restored */
   AFTER_RESTORE = 'pavilion-mfe:after-restore',
-  /** Fired when a segment encounters an error */
-  SEGMENT_ERROR = 'pavilion-mfe:segment-error',
+  /** Fired when a sub-app encounters an error */
+  SUB_APP_ERROR = 'pavilion-mfe:sub-app-error',
 }
 
 export interface RouteChangeDetail {
@@ -35,8 +35,8 @@ export interface SwitchAppDetail {
 export interface BridgeOptions {
   /** Identifies the app in the bridge */
   appCode: string
-  /** 'shell' for the host, 'segment' for child apps */
-  role: 'shell' | 'segment'
+  /** 'main-app' for the main app, 'sub-app' for sub-apps */
+  role: 'main-app' | 'sub-app'
 }
 
 export type EventCallback<T = unknown> = (detail: T) => void

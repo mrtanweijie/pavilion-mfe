@@ -1,4 +1,4 @@
-import type { SegmentApp, RegisteredApp, RouterConfig, RouterHooks, HookContext } from './types.js'
+import type { SubApp, RegisteredApp, RouterConfig, RouterHooks, HookContext } from './types.js'
 import { Sandbox, setRouteMatcher, pavilionMfeLog } from '@pavilion-mfe/sandbox'
 
 /**
@@ -6,7 +6,7 @@ import { Sandbox, setRouteMatcher, pavilionMfeLog } from '@pavilion-mfe/sandbox'
  * Extracted from chagee's routerManager.js.
  *
  * Manages loading → bootstrap → mount → unmount lifecycle
- * for multiple segment apps based on URL path matching.
+ * for multiple sub-apps based on URL path matching.
  * Attaches Sandbox isolation on mount, cleans up on unmount.
  */
 export function createRouter(config?: RouterConfig) {
@@ -20,8 +20,8 @@ export function createRouter(config?: RouterConfig) {
 
   /**
    * Dispatch a PavilionMfe routing event.
-   * Events: pavilion-mfe:before-routing, pavilion-mfe:after-routing, pavilion-mfe:segment-switch,
-   *         pavilion-mfe:before-cache, pavilion-mfe:after-restore, pavilion-mfe:segment-error
+   * Events: pavilion-mfe:before-routing, pavilion-mfe:after-routing, pavilion-mfe:sub-app-switch,
+   *         pavilion-mfe:before-cache, pavilion-mfe:after-restore, pavilion-mfe:sub-app-error
    */
   function dispatch(name: string, detail: Record<string, unknown>): void {
     pavilionMfeLog('router', name.replace('pavilion-mfe:', ''), detail)
@@ -47,7 +47,7 @@ export function createRouter(config?: RouterConfig) {
     config.apps.forEach((app) => register(app))
   }
 
-  function register(app: SegmentApp): void {
+  function register(app: SubApp): void {
     apps.push({
       name: app.name,
       app: app.load,
@@ -63,7 +63,7 @@ export function createRouter(config?: RouterConfig) {
       keepAlive: app.keepAlive ?? false,
       cachedAt: 0,
     })
-    pavilionMfeLog('router', 'segment-register', { appCode: app.name, keepAlive: app.keepAlive ?? false, basename: app.basename ?? '' })
+    pavilionMfeLog('router', 'sub-app-register', { appCode: app.name, keepAlive: app.keepAlive ?? false, basename: app.basename ?? '' })
   }
 
   function getContainer(name: string): HTMLElement {
@@ -94,12 +94,12 @@ export function createRouter(config?: RouterConfig) {
       }
       app.status = 'NOT_MOUNTED'
       const ms = Math.round(performance.now() - t0)
-      pavilionMfeLog('router', 'segment-load', { appCode: app.name, ms })
+      pavilionMfeLog('router', 'sub-app-load', { appCode: app.name, ms })
       hooks?.afterLoad?.(makeHookCtx(app, ms))
     } catch (err) {
       const ms = Math.round(performance.now() - t0)
-      pavilionMfeLog('router', 'segment-error', { appCode: app.name, phase: 'load', error: String(err) })
-      dispatch('pavilion-mfe:segment-error', { appCode: app.name, phase: 'load', error: String(err), ms })
+      pavilionMfeLog('router', 'sub-app-error', { appCode: app.name, phase: 'load', error: String(err) })
+      dispatch('pavilion-mfe:sub-app-error', { appCode: app.name, phase: 'load', error: String(err), ms })
       hooks?.onError?.(makeHookCtx(app, ms, err))
       app.status = 'NOT_LOADED'
     }
@@ -113,12 +113,12 @@ export function createRouter(config?: RouterConfig) {
     if (app.status !== 'CACHED') return
     hooks?.beforeMount?.(makeHookCtx(app))
     // Sandbox was kept alive — popstate proxy will now pass events through
-    // since the segment's route is active again.
+    // since the sub-app's route is active again.
     if (app.container) {
       app.container.style.display = 'block'
     }
     app.status = 'MOUNTED'
-    pavilionMfeLog('router', 'segment-restore', { appCode: app.name })
+    pavilionMfeLog('router', 'sub-app-restore', { appCode: app.name })
     dispatch('pavilion-mfe:after-restore', { appCode: app.name })
     hooks?.afterRestore?.(makeHookCtx(app))
   }
@@ -145,13 +145,13 @@ export function createRouter(config?: RouterConfig) {
     app.cleanup = cleanup ?? null
     app.status = 'MOUNTED'
     const ms = Math.round(performance.now() - t0)
-    pavilionMfeLog('router', 'segment-mount', { appCode: app.name, ms })
+    pavilionMfeLog('router', 'sub-app-mount', { appCode: app.name, ms })
     hooks?.afterMount?.(makeHookCtx(app, ms))
   }
 
   /**
-   * Evict the oldest CACHED segment when cache is full (LRU).
-   * Called before caching a new segment.
+   * Evict the oldest CACHED sub-app when cache is full (LRU).
+   * Called before caching a new sub-app.
    */
   function evictLRU(): void {
     const cachedApps = apps.filter((a) => a.status === 'CACHED')
@@ -169,7 +169,7 @@ export function createRouter(config?: RouterConfig) {
     }
 
     // Full unmount the evicted app
-    pavilionMfeLog('router', 'segment-evict', { appCode: oldest.name, reason: 'LRU' })
+    pavilionMfeLog('router', 'sub-app-evict', { appCode: oldest.name, reason: 'LRU' })
     oldest.sandbox?.deactivate()
     oldest.sandbox = null
     if (oldest.cleanup) {
@@ -203,7 +203,7 @@ export function createRouter(config?: RouterConfig) {
 
       // Keep-alive: hide container, retain framework instance + DOM + sandbox.
       // Do NOT deactivate sandbox — the popstate proxy will block events
-      // when the segment's route is inactive, and pass them through when
+      // when the sub-app's route is inactive, and pass them through when
       // the user navigates back. Deactivating would remove the popstate
       // listener permanently, breaking the framework router on restore.
       if (app.container) {
@@ -212,7 +212,7 @@ export function createRouter(config?: RouterConfig) {
       app.status = 'CACHED'
       if (meta) meta.cachedAt = Date.now()
       const ms = Math.round(performance.now() - t0)
-      pavilionMfeLog('router', 'segment-cache', { appCode: app.name, ms })
+      pavilionMfeLog('router', 'sub-app-cache', { appCode: app.name, ms })
       dispatch('pavilion-mfe:before-cache', { appCode: app.name })
       hooks?.beforeCache?.(makeHookCtx(app, ms))
       hooks?.afterUnmount?.(makeHookCtx(app, ms))
@@ -240,13 +240,13 @@ export function createRouter(config?: RouterConfig) {
     }
     app.status = 'NOT_MOUNTED'
     const ms = Math.round(performance.now() - t0)
-    pavilionMfeLog('router', 'segment-unmount', { appCode: app.name, ms })
+    pavilionMfeLog('router', 'sub-app-unmount', { appCode: app.name, ms })
     hooks?.afterUnmount?.(makeHookCtx(app, ms))
   }
 
   /**
-   * Manually clear cached segments.
-   * @param name - If provided, clears only the specified segment; otherwise clears all.
+   * Manually clear cached sub-apps.
+   * @param name - If provided, clears only the specified sub-app; otherwise clears all.
    */
   function clearCache(name?: string): void {
     const cachedApps = apps.filter(
@@ -269,7 +269,7 @@ export function createRouter(config?: RouterConfig) {
       app.status = 'NOT_MOUNTED'
       const meta = keepAliveMap.get(app.name)
       if (meta) meta.cachedAt = 0
-      pavilionMfeLog('router', 'segment-clear-cache', { appCode: app.name })
+      pavilionMfeLog('router', 'sub-app-clear-cache', { appCode: app.name })
     }
   }
 
@@ -309,11 +309,11 @@ export function createRouter(config?: RouterConfig) {
       await Promise.all(appsToRestore.map(restoreApp))
     }
 
-    // Detect segment switch after reroute completes
+    // Detect sub-app switch after reroute completes
     const currentCodes = matchActiveApps().map((a) => a.name).sort()
     const prevSorted = [...prevActiveAppCodes].sort()
     if (JSON.stringify(currentCodes) !== JSON.stringify(prevSorted)) {
-      dispatch('pavilion-mfe:segment-switch', { from: prevActiveAppCodes, to: currentCodes })
+      dispatch('pavilion-mfe:sub-app-switch', { from: prevActiveAppCodes, to: currentCodes })
       prevActiveAppCodes = currentCodes
     }
   }
@@ -366,15 +366,15 @@ export function createRouter(config?: RouterConfig) {
   }
 
   function start(): void {
-    pavilionMfeLog('router', 'router-start', { segments: apps.length, maxCache })
+    pavilionMfeLog('router', 'router-start', { subApps: apps.length, maxCache })
 
-    // Mark the global environment so segment apps can detect Shell mode
-    // via isPavilionMfeShell() without querying the DOM.
+    // Mark the global environment so sub-apps can detect main-app mode
+    // via isPavilionMfeMainApp() without querying the DOM.
     ;(globalThis as Record<string, unknown>).__PAVILION_MFE_ENV__ = true
 
-    // Set up route isolation: segment popstate listeners only fire when
-    // the segment's route is active. This prevents inactive segments from
-    // processing navigation events intended for other segments.
+    // Set up route isolation: sub-app popstate listeners only fire when
+    // the sub-app's route is active. This prevents inactive sub-apps from
+    // processing navigation events intended for other sub-apps.
     setRouteMatcher((appCode, path) => {
       return apps.some(
         (app) => app.name === appCode && app.activeWhen(path)

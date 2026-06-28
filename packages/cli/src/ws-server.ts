@@ -5,7 +5,7 @@
  * Extracted from chagee's ws-server.js.
  *
  * Receives port registrations from local dev servers
- * and broadcasts the port list to connected clients (browser plugin, shell).
+ * and broadcasts the port list to connected clients (browser plugin, main app).
  */
 
 import { WebSocketServer, WebSocket } from 'ws'

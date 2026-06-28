@@ -58,7 +58,7 @@ export function resolveRemotes(
 }
 
 /**
- * Build-time: generate the base URL for this segment's versioned output
+ * Build-time: generate the base URL for this sub-app's versioned output
  */
 export function resolveBuildBase(cdn: string, pkg: string, version: string): string {
   return `${cdn}/mfe/${pkg}/${version}/`

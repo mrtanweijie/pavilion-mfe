@@ -1,7 +1,7 @@
 <template>
   <div class="test-page">
     <h2>测试页</h2>
-    <p style="color: #999; margin-bottom: 24px">这是基座应用自带的页面，不经过子应用加载。</p>
+    <p style="color: #999; margin-bottom: 24px">这是主应用自带的页面，不经过子应用加载。</p>
 
     <el-card shadow="hover">
       <template #header><span>环境信息</span></template>

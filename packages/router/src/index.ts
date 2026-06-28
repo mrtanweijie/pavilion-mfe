@@ -1,14 +1,14 @@
 export { createRouter } from './create-router.js'
 export { matchAppByPath, navigateTo, createPathMatcher } from './match-app.js'
-export { isPavilionMfeShell } from './env.js'
+export { isPavilionMfeMainApp } from './env.js'
 export type {
-  SegmentApp,
-  SegmentLifecycle,
+  SubApp,
+  SubAppLifecycle,
   AppContext,
-  ShellConfig,
+  MainAppConfig,
   RegisteredApp,
   AppStatus,
-  SegmentRouteConfig,
+  SubAppRouteConfig,
   RouterConfig,
   RouterHooks,
   HookContext,

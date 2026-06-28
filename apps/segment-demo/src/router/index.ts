@@ -35,15 +35,15 @@ export function createDemoRouter(history?: RouterHistory) {
 
   // 404 重定向守卫：在组件加载/渲染之前同步执行，
   // 确保 URL 在 PavilionMfe reroute 运行前就已变为 /404，
-  // 避免段被 restore 后用户短暂看到 App.vue 内容的竞态问题。
+  // 避免子应用被 restore 后用户短暂看到 App.vue 内容的竞态问题。
   router.beforeEach((to) => {
     if (
       to.matched.length > 0 &&
       to.matched[0].path === '/demo/:pathMatch(.*)*'
     ) {
-      const isShell = !!window.__PAVILION_MFE_ENV__
-      if (isShell) {
-        // Shell 模式：重定向到基座 /404 页面
+      const isMainApp = !!window.__PAVILION_MFE_ENV__
+      if (isMainApp) {
+        // 主应用模式：重定向到主应用 /404 页面
         window.history.replaceState(null, '', '/404')
         window.dispatchEvent(new PopStateEvent('popstate', { state: null }))
       } else {

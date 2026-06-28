@@ -1,5 +1,5 @@
 /**
- * Event bus for Shell-Segment and segment-segment communication.
+ * Event bus for main-app ↔ sub-app and sub-app ↔ sub-app communication.
  * Extracted from chagee's event.js EventEmitter.
  */
 

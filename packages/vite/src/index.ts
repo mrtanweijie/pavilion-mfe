@@ -31,7 +31,7 @@ export function PavilionMfe(options: PavilionMfePluginOptions): PluginOption[] {
     name: 'pavilion-mfe:build-config',
     apply: 'build',
     config: (config) => {
-      if (options.role === 'segment' || options.role === 'runtime') {
+      if (options.role === 'sub-app' || options.role === 'runtime') {
         config.base = `${cdn}/mfe/${options.name ?? 'unknown'}/`
       }
 
@@ -65,8 +65,8 @@ export function PavilionMfe(options: PavilionMfePluginOptions): PluginOption[] {
         if (!drop.includes('debugger')) drop.push('debugger')
       }
 
-      // Shell: no public dir (everything is served via MF remotes)
-      if (options.role === 'shell') {
+      // Main app: no public dir (everything is served via MF remotes)
+      if (options.role === 'main-app') {
         config.publicDir = false
       }
     },
@@ -138,8 +138,8 @@ export function PavilionMfe(options: PavilionMfePluginOptions): PluginOption[] {
 
   plugins.push(mfFederation(mfOptions))
 
-  // ─── 3. CSS Scope (segment builds only) ───
-  if (options.role === 'segment' || options.role === 'runtime') {
+  // ─── 3. CSS Scope (sub-app builds only) ───
+  if (options.role === 'sub-app' || options.role === 'runtime') {
     const scopePrefix = `pavilion-mfe-${options.name ?? 'unknown'}`
 
     plugins.push({
@@ -162,7 +162,7 @@ export function PavilionMfe(options: PavilionMfePluginOptions): PluginOption[] {
   }
 
   // ─── 4. Dev-time WS port discovery ───
-  if (options.openDevServe && options.role === 'segment' && options.port) {
+  if (options.openDevServe && options.role === 'sub-app' && options.port) {
     plugins.push(
       wsDiscoveryPlugin({ port: options.port, name: options.name })
     )

@@ -1,16 +1,16 @@
 import type { Sandbox } from '@pavilion-mfe/sandbox'
 
-export interface SegmentApp {
+export interface SubApp {
   name: string
-  load: () => Promise<SegmentLifecycle>
+  load: () => Promise<SubAppLifecycle>
   activeWhen: (path: string) => boolean
-  /** Route prefix passed to the segment as ctx.basename (e.g. '/react') */
+  /** Route prefix passed to the sub-app as ctx.basename (e.g. '/react') */
   basename?: string
-  /** Keep this segment's framework instance alive when unmounted (display:none only) */
+  /** Keep this sub-app's framework instance alive when unmounted (display:none only) */
   keepAlive?: boolean
 }
 
-export interface SegmentLifecycle {
+export interface SubAppLifecycle {
   bootstrap?: (ctx: AppContext) => void | Promise<void>
   mount: (ctx: AppContext, el: HTMLElement) => (() => void) | Promise<(() => void) | void> | void
   unmount?: (ctx: AppContext, el: HTMLElement) => void | Promise<void>
@@ -23,8 +23,8 @@ export interface AppContext {
   [key: string]: unknown
 }
 
-export interface ShellConfig {
-  apps: SegmentApp[]
+export interface MainAppConfig {
+  apps: SubApp[]
 }
 
 export type AppStatus =
@@ -39,17 +39,17 @@ export type AppStatus =
 
 export interface RegisteredApp {
   name: string
-  app: () => Promise<SegmentLifecycle>
+  app: () => Promise<SubAppLifecycle>
   activeWhen: (path: string) => boolean
   basename: string
   status: AppStatus
-  lifecycle: SegmentLifecycle | null
+  lifecycle: SubAppLifecycle | null
   container: HTMLElement | null
   cleanup: (() => void) | null
   sandbox: Sandbox | null
 }
 
-export interface SegmentRouteConfig {
+export interface SubAppRouteConfig {
   name: string
   routes: string[]
 }
@@ -81,8 +81,8 @@ export interface RouterHooks {
 
 /** Configuration for createRouter */
 export interface RouterConfig {
-  apps?: SegmentApp[]
-  /** Global max cached segments (LRU eviction). Default: 5 */
+  apps?: SubApp[]
+  /** Global max cached sub-apps (LRU eviction). Default: 5 */
   maxCache?: number
   /** Lifecycle hooks for external monitoring */
   hooks?: RouterHooks

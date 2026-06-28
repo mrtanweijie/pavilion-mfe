@@ -20,7 +20,7 @@ console.log(
   ST_KEY, ST_VAL, cdn || '(relative)',
 )
 
-/** 被壳加载时调用 */
+/** 被主应用加载时调用 */
 export default {
   mount: async (_ctx: any, el: HTMLElement) => {
     console.log('[PavilionMfe 微前端] mount', appCode)

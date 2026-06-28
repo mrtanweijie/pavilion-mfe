@@ -3,7 +3,7 @@
  * Extracted from chagee's app.js — prefix-based routing.
  */
 
-export interface SegmentRouteConfig {
+export interface SubAppRouteConfig {
   name: string
   routes: string[]
 }
@@ -25,13 +25,13 @@ export function createPathMatcher(routes: string[]): (path: string) => boolean {
 }
 
 /**
- * Match a URL path to a segment by prefix.
+ * Match a URL path to a sub-app by prefix.
  * Both sides normalize trailing slashes for consistent matching.
  */
 export function matchAppByPath(
   path: string,
-  segments: SegmentRouteConfig[]
-): SegmentRouteConfig | null {
+  subApps: SubAppRouteConfig[]
+): SubAppRouteConfig | null {
   if (!path) return null
 
   // Extract pathname from full URLs
@@ -39,8 +39,8 @@ export function matchAppByPath(
     path = new URL(path, location.origin).pathname || ''
   }
 
-  for (const seg of segments) {
-    if (createPathMatcher(seg.routes)(path)) return seg
+  for (const app of subApps) {
+    if (createPathMatcher(app.routes)(path)) return app
   }
   return null
 }

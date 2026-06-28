@@ -4,11 +4,11 @@ import { existsSync, mkdirSync, writeFileSync } from 'fs'
 import { resolve } from 'path'
 
 const TEMPLATES: Record<string, Record<string, string>> = {
-  'segment-main.ts': {
-    path: 'src/segment-main.ts',
+  'sub-app-main.ts': {
+    path: 'src/sub-app-main.ts',
     content: `/**
- * PavilionMfe segment lifecycle entry.
- * Export mount/unmount to be loaded by the Shell.
+ * PavilionMfe sub-app lifecycle entry.
+ * Export mount/unmount to be loaded by the main app.
  */
 export default {
   mount: async (ctx: { appCode: string; basename: string }, el: HTMLElement) => {
@@ -29,9 +29,9 @@ import { PavilionMfe } from '@pavilion-mfe/vite'
 export default defineConfig({
   plugins: [
     PavilionMfe({
-      role: 'segment',
+      role: 'sub-app',
       name: process.env.npm_package_name ?? 'my-app',
-      exposes: { './main': './src/segment-main.ts' },
+      exposes: { './main': './src/sub-app-main.ts' },
       shared: [],
     }),
   ],
@@ -46,7 +46,7 @@ export default defineConfig({
     path: 'package.json',
     content: JSON.stringify(
       {
-        name: 'my-pavilion-mfe-segment',
+        name: 'my-pavilion-mfe-sub-app',
         version: '0.1.0',
         private: true,
         type: 'module',
@@ -64,7 +64,7 @@ export default defineConfig({
     path: 'index.html',
     content: `<!DOCTYPE html>
 <html lang="en">
-<head><meta charset="UTF-8" /><title>My PavilionMfe Segment</title></head>
+<head><meta charset="UTF-8" /><title>My PavilionMfe Sub-App</title></head>
 <body><div id="app"></div><script type="module" src="/src/main.ts"></script></body>
 </html>
 `,

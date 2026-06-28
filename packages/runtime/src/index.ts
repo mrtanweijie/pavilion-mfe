@@ -2,7 +2,7 @@
  * @pavilion-mfe/runtime — Shared runtime kernel
  *
  * This package is designed to be exposed as a Module Federation remote.
- * Shell and Segment apps both import from it and share the same instance.
+ * Main app and sub-apps both import from it and share the same instance.
  *
  * It re-exports everything from the lower-level PavilionMfe packages
  * and adds orchestrator-level utilities.
@@ -15,10 +15,10 @@ export {
 } from '@pavilion-mfe/router'
 
 export type {
-  SegmentApp,
-  SegmentLifecycle,
+  SubApp,
+  SubAppLifecycle,
   AppContext,
-  SegmentRouteConfig,
+  SubAppRouteConfig,
 } from '@pavilion-mfe/router'
 
 export {

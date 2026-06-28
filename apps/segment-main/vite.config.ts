@@ -34,7 +34,7 @@ export default defineConfig(({ command, mode }: ConfigEnv) => {
     plugins: [
       vue(),
       PavilionMfe({
-        role: 'shell',
+        role: 'main-app',
         name: appCode,
         env: pavilionMfeEnv,
         cdn,

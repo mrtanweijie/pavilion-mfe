@@ -1,7 +1,7 @@
 import React from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App'
-import { createSegmentRouter, createStandaloneRouter } from './router'
+import { createSubAppRouter, createStandaloneRouter } from './router'
 
 const appCode = import.meta.env.VITE_PAVILION_MFE_APP_CODE
 const pavilionMfeEnv = import.meta.env.VITE_PAVILION_MFE_ENV || 'develop'
@@ -19,13 +19,13 @@ console.log(
   ST_KEY, ST_VAL, cdn || '(relative)',
 )
 
-/** 被壳加载时调用 */
+/** 被主应用加载时调用 */
 export default {
   mount: async (_ctx: any, el: HTMLElement) => {
     
     console.log('[PavilionMfe 微前端] mount', appCode)
 
-    const router = createSegmentRouter(_ctx?.basename)
+    const router = createSubAppRouter(_ctx?.basename)
     const root = createRoot(el)
     root.render(
       <React.StrictMode>

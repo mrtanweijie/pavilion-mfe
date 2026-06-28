@@ -2,8 +2,8 @@
   <el-container class="segment-main">
     <Sidebar />
     <el-main class="main">
-      <router-view v-show="!isSegmentRoute" />
-      <div id="pavilion-mfe-container" v-show="isSegmentRoute"></div>
+      <router-view v-show="!isSubAppRoute" />
+      <div id="pavilion-mfe-container" v-show="isSubAppRoute"></div>
     </el-main>
   </el-container>
 </template>
@@ -17,10 +17,10 @@ import mfeConfig from '../../mfe.json'
 
 const route = useRoute()
 
-/** Whether the current route belongs to a micro-frontend segment */
-const isSegmentRoute = computed(() =>
-  mfeConfig.apps.some((seg: any) =>
-    createPathMatcher(seg.routes)(route.path)
+/** Whether the current route belongs to a micro-frontend sub-app */
+const isSubAppRoute = computed(() =>
+  mfeConfig.apps.some((app: any) =>
+    createPathMatcher(app.routes)(route.path)
   )
 )
 </script>

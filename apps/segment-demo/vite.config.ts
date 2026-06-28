@@ -22,7 +22,7 @@ export default defineConfig(({ command, mode }: ConfigEnv) => {
     plugins: [
       vue(),
       PavilionMfe({
-        role: 'segment',
+        role: 'sub-app',
         name: appCode,
         exposes: {
           './main': './src/main.ts',

@@ -11,7 +11,7 @@ export interface FederationUserOptions {
 }
 
 export interface PavilionMfePluginOptions extends FederationUserOptions {
-  role: 'shell' | 'segment' | 'runtime' | 'login'
+  role: 'main-app' | 'sub-app' | 'runtime' | 'login'
 
   /** pkg@version → resolves to CDN manifest URL */
   pavilionMfeRemotes?: Record<string, string>

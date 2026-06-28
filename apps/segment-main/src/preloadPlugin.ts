@@ -1,11 +1,11 @@
 /**
  * PavilionMfe runtime preload plugin for Module Federation.
  *
- * ① beforeInit: dynamically register all segments as MF remotes
+ * ① beforeInit: dynamically register all sub-apps as MF remotes
  *    (no need to statically declare them in vite.config.ts)
  *
- * ② preload: immediately load the current segment, then preload
- *    other segments after a 1s delay
+ * ② preload: immediately load the current sub-app, then preload
+ *    other sub-apps after a 1s delay
  */
 import mfeConfig from '../mfe.json'
 import { loadRemote, preloadRemote } from '@module-federation/runtime'
@@ -42,7 +42,7 @@ interface MfeApp {
 const apps: MfeApp[] = mfeConfig.apps
 
 /**
- * Match a segment by URL path.
+ * Match a sub-app by URL path.
  * Uses the same trailing-slash normalization as createRouter.
  */
 function matchAppByPath(path: string): MfeApp | null {
@@ -60,8 +60,8 @@ function matchAppByPath(path: string): MfeApp | null {
 
 /**
  * Preload strategy:
- * - Current segment: loadRemote immediately (user is waiting)
- * - Other segments: preloadRemote after 1s delay (idle prefetch)
+ * - Current sub-app: loadRemote immediately (user is waiting)
+ * - Other sub-apps: preloadRemote after 1s delay (idle prefetch)
  */
 function preload(): void {
   const currentApp = matchAppByPath(location.pathname)
@@ -70,7 +70,7 @@ function preload(): void {
     (app) => app.appCode !== currentApp?.appCode
   )
 
-  // ① Immediately load the current segment
+  // ① Immediately load the current sub-app
   if (currentApp) {
     loadRemote(`${currentApp.appCode}/main`)
       .then(() => {
@@ -82,7 +82,7 @@ function preload(): void {
       })
   }
 
-  // ② Delay-preload other segments
+  // ② Delay-preload other sub-apps
   setTimeout(() => {
     preloadRemote(
       otherApps.map((app) => ({
@@ -95,7 +95,7 @@ function preload(): void {
       })
       .catch((err) => {
         preloadLog('preload-others', { status: 'failed' })
-        console.error('[PavilionMfe] Preload of other segments failed:', err)
+        console.error('[PavilionMfe] Preload of other sub-apps failed:', err)
       })
   }, 1000)
 }
@@ -108,7 +108,7 @@ export default function () {
     name: 'pavilion-mfe-preload',
 
     /**
-     * Register all segments as MF remotes at runtime.
+     * Register all sub-apps as MF remotes at runtime.
      * This replaces static `pavilionMfeRemotes` / `remotes` in vite.config.ts.
      */
     beforeInit(args: any) {

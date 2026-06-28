@@ -29,18 +29,18 @@ const routes = [
     component: () => import('../pages/404.vue'),
   },
   {
-    // catch-all：微前端段路由（/demo/*, /react/* 等）
+    // catch-all：微前端子应用路由（/demo/*, /react/* 等）
     // 实际渲染由 #pavilion-mfe-container（在 MainLayout 中）处理，
-    // 此路由仅用于让 Vue Router 匹配段路径，保持 route.path 正确更新。
-    // 非段路径（如 /env/test）重定向到 404。
+    // 此路由仅用于让 Vue Router 匹配子应用路径，保持 route.path 正确更新。
+    // 非子应用路径（如 /env/test）重定向到 404。
     path: '/:pathMatch(.*)*',
     name: 'MFPage',
     component: { render: () => null },
     beforeEnter: (to: RouteLocationNormalized) => {
-      const isSegmentRoute = mfeConfig.apps.some((seg) =>
-        createPathMatcher(seg.routes)(to.path)
+      const isSubAppRoute = mfeConfig.apps.some((app) =>
+        createPathMatcher(app.routes)(to.path)
       )
-      if (!isSegmentRoute) {
+      if (!isSubAppRoute) {
         return '/404'
       }
     },

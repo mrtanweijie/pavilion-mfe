@@ -2,7 +2,7 @@
  * LocalStorage observer with subscription support.
  * Extracted from chagee's event.js LocalStorageObserver.
  *
- * Allows Shell and Segment apps to share state via localStorage
+ * Allows the main app and sub-apps to share state via localStorage
  * with reactive subscriptions.
  */
 
