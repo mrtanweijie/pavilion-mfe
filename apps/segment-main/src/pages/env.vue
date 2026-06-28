@@ -17,7 +17,7 @@
       <el-col :span="8">
         <el-card shadow="hover">
           <template #header><span>微前端</span></template>
-          <el-tag>Pavilion</el-tag>
+          <el-tag>PavilionMfe</el-tag>
         </el-card>
       </el-col>
     </el-row>
@@ -40,7 +40,7 @@
       <template #header><span>环境配置</span></template>
       <el-descriptions :column="2" border>
         <el-descriptions-item label="当前环境">
-          <el-tag :type="pavilionEnv === 'production' ? 'danger' : pavilionEnv === 'uat' ? 'warning' : 'success'">{{ pavilionEnv }}</el-tag>
+          <el-tag :type="pavilionMfeEnv === 'production' ? 'danger' : pavilionMfeEnv === 'uat' ? 'warning' : 'success'">{{ pavilionMfeEnv }}</el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="API Base">{{ apiBase || '-' }}</el-descriptions-item>
         <el-descriptions-item label="CDN">{{ cdn || '-' }}</el-descriptions-item>
@@ -70,9 +70,9 @@ const online = ref(navigator.onLine)
 
 const tableData = mfeConfig.apps
 
-const pavilionEnv = (import.meta.env.VITE_PAVILION_ENV || 'dev') as string
+const pavilionMfeEnv = (import.meta.env.VITE_PAVILION_MFE_ENV || 'dev') as string
 const apiBase = (import.meta.env.VITE_BASE_API_URL || '') as string
-const cdn = (import.meta.env.VITE_PAVILION_CDN || '') as string
+const cdn = (import.meta.env.VITE_PAVILION_MFE_CDN || '') as string
 </script>
 
 <style scoped>

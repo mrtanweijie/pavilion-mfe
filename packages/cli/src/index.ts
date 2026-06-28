@@ -7,8 +7,8 @@ import { buildCommand } from './commands/build.js'
 const program = new Command()
 
 program
-  .name('pavilion')
-  .description('Pavilion micro-frontend framework CLI')
+  .name('pavilion-mfe')
+  .description('PavilionMfe micro-frontend framework CLI')
   .version('0.1.0')
 
 program

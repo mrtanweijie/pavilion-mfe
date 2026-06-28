@@ -6,7 +6,7 @@
  * sandbox on top of the stack at creation time.
  */
 
-import { pavilionLog } from './logger.js'
+import { pavilionMfeLog } from './logger.js'
 
 interface TrackedListener {
   target: EventTarget
@@ -60,7 +60,7 @@ export function setRouteMatcher(fn: (appCode: string, path: string) => boolean):
 function patchGlobals(): void {
   if (globalsPatched) return
   globalsPatched = true
-  pavilionLog('sandbox', 'globals-patch')
+  pavilionMfeLog('sandbox', 'globals-patch')
 
   globalThis.setTimeout = ((handler: any, timeout?: any, ...args: any[]) => {
     const id = origSetTimeout(handler, timeout, ...args) as number
@@ -98,7 +98,7 @@ function patchGlobals(): void {
             if (routeMatcher!(appCode, location.pathname)) {
               handler(event)
             } else {
-              pavilionLog('sandbox', 'popstate-blocked', { appCode, path: location.pathname })
+              pavilionMfeLog('sandbox', 'popstate-blocked', { appCode, path: location.pathname })
             }
           }
           popstateProxyMap.set(handler, proxyHandler)
@@ -149,7 +149,7 @@ export class Sandbox {
     patchGlobals()
     activeStack.push(this)
     this.activated = true
-    pavilionLog('sandbox', 'sandbox-activate', { appCode: this.appCode })
+    pavilionMfeLog('sandbox', 'sandbox-activate', { appCode: this.appCode })
   }
 
   deactivate(): void {
@@ -184,7 +184,7 @@ export class Sandbox {
     })
     this.globalKeys.clear()
 
-    pavilionLog('sandbox', 'sandbox-deactivate', {
+    pavilionMfeLog('sandbox', 'sandbox-deactivate', {
       appCode: this.appCode,
       timers,
       intervals,

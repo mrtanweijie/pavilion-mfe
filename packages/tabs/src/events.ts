@@ -1,6 +1,6 @@
 export const TAB_EVENTS = {
-  ROUTE_BEFORE: 'pavilion:tab:route-before',
-  ROUTE_AFTER: 'pavilion:tab:route-after',
+  ROUTE_BEFORE: 'pavilion-mfe:tab:route-before',
+  ROUTE_AFTER: 'pavilion-mfe:tab:route-after',
 } as const
 
 export interface TabRouteDetail {

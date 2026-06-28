@@ -28,7 +28,7 @@ importers:
         specifier: ^4.4.0
         version: 4.6.4(vue@3.5.39)
     devDependencies:
-      '@pavilion/vite':
+      '@pavilion-mfe/vite':
         specifier: workspace:*
         version: link:../../packages/vite
       '@vitejs/plugin-vue':
@@ -56,10 +56,10 @@ importers:
         specifier: ^4.4.0
         version: 4.6.4(vue@3.5.39)
     devDependencies:
-      '@pavilion/router':
+      '@pavilion-mfe/router':
         specifier: workspace:*
         version: link:../../packages/router
-      '@pavilion/vite':
+      '@pavilion-mfe/vite':
         specifier: workspace:*
         version: link:../../packages/vite
       '@vitejs/plugin-vue':
@@ -87,7 +87,7 @@ importers:
         specifier: ^6.26.0
         version: 6.30.4(react-dom@18.3.1)(react@18.3.1)
     devDependencies:
-      '@pavilion/vite':
+      '@pavilion-mfe/vite':
         specifier: workspace:*
         version: link:../../packages/vite
       '@remix-run/router':
@@ -132,19 +132,19 @@ importers:
 
   packages/router:
     dependencies:
-      '@pavilion/sandbox':
+      '@pavilion-mfe/sandbox':
         specifier: workspace:*
         version: link:../sandbox
 
   packages/runtime:
     dependencies:
-      '@pavilion/bridge':
+      '@pavilion-mfe/bridge':
         specifier: workspace:*
         version: link:../bridge
-      '@pavilion/router':
+      '@pavilion-mfe/router':
         specifier: workspace:*
         version: link:../router
-      '@pavilion/sandbox':
+      '@pavilion-mfe/sandbox':
         specifier: workspace:*
         version: link:../sandbox
 

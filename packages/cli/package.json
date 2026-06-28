@@ -1,11 +1,11 @@
 {
-  "name": "@pavilion/cli",
+  "name": "@pavilion-mfe/cli",
   "version": "0.1.0",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "pavilion": "./bin/pavilion.js"
+    "pavilion-mfe": "./bin/pavilion-mfe.js"
   },
   "files": ["dist", "bin"],
   "scripts": {

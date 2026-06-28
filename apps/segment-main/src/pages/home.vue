@@ -1,6 +1,6 @@
 <template>
   <div class="welcome">
-    <el-result icon="success" title="Pavilion 微前端框架">
+    <el-result icon="success" title="PavilionMfe 微前端框架">
       <template #sub-title>
         <p>基于 Module Federation 的微前端开源框架，支持 Vue / React 混合渲染</p>
       </template>
@@ -39,7 +39,7 @@
 
 <script setup lang="ts">
 import { Grid, Connection } from '@element-plus/icons-vue'
-import { navigateTo } from '@pavilion/router'
+import { navigateTo } from '@pavilion-mfe/router'
 import mfeConfig from '../../mfe.json'
 
 const apps = mfeConfig.apps

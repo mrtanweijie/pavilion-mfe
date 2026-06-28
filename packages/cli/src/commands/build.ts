@@ -3,6 +3,6 @@ export async function buildCommand(options: {
   version?: string
   env?: string
 }): Promise<void> {
-  console.log('[Pavilion] Building...')
-  console.log('[Pavilion] ', JSON.stringify(options, null, 2))
+  console.log('[PavilionMfe] Building...')
+  console.log('[PavilionMfe] ', JSON.stringify(options, null, 2))
 }

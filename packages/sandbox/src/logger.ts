@@ -1,31 +1,31 @@
 /**
- * Shared Pavilion logger with per-module toggle support.
+ * Shared PavilionMfe logger with per-module toggle support.
  *
  * Configuration:
  *   // Programmatic (call once at app startup)
  *   configureLog({ enabled: true, modules: { sandbox: false } })
  *
  *   // Or via global (before scripts load)
- *   window.__PAVILION_LOG__ = { modules: { sandbox: false } }
+ *   window.__PAVILION_MFE_LOG__ = { modules: { sandbox: false } }
  *
  * Default: all modules enabled.
  *
  * Output format (colorized in browser DevTools):
- *   [Pavilion] router    before-routing   trigger=pushState  url=/demo/list
- *   [Pavilion] sandbox   activate         appCode=demo-app
- *   [Pavilion] router    segment-switch   demo-app → react-app
+ *   [PavilionMfe] router    before-routing   trigger=pushState  url=/demo/list
+ *   [PavilionMfe] sandbox   activate         appCode=demo-app
+ *   [PavilionMfe] router    segment-switch   demo-app → react-app
  */
 
 export type LogModule = 'router' | 'sandbox' | 'preload' | 'bridge'
 
-export interface PavilionLogConfig {
+export interface PavilionMfeLogConfig {
   /** Master switch — when false, all logging is disabled */
   enabled: boolean
   /** Per-module toggles. Missing keys default to true. */
   modules: Partial<Record<LogModule, boolean>>
 }
 
-const DEFAULT_CONFIG: PavilionLogConfig = {
+const DEFAULT_CONFIG: PavilionMfeLogConfig = {
   enabled: true,
   modules: {},
 }
@@ -39,9 +39,9 @@ const STYLE_ERROR = 'color:#ef4444;font-weight:bold'
 
 // ─── Config reader ───
 
-function getConfig(): PavilionLogConfig {
+function getConfig(): PavilionMfeLogConfig {
   const g = globalThis as Record<string, unknown>
-  const globalConfig = g.__PAVILION_LOG__ as Partial<PavilionLogConfig> | undefined
+  const globalConfig = g.__PAVILION_MFE_LOG__ as Partial<PavilionMfeLogConfig> | undefined
   if (!globalConfig) return DEFAULT_CONFIG
   return {
     enabled: globalConfig.enabled ?? DEFAULT_CONFIG.enabled,
@@ -55,10 +55,10 @@ export function isLogEnabled(module: LogModule): boolean {
   return config.modules[module] ?? true
 }
 
-export function configureLog(config: Partial<PavilionLogConfig>): void {
+export function configureLog(config: Partial<PavilionMfeLogConfig>): void {
   const current = getConfig()
   const g = globalThis as Record<string, unknown>
-  g.__PAVILION_LOG__ = {
+  g.__PAVILION_MFE_LOG__ = {
     enabled: config.enabled ?? current.enabled,
     modules: { ...current.modules, ...config.modules },
   }
@@ -83,7 +83,7 @@ function formatPairs(detail: Record<string, unknown>): string {
 
 // ─── Public log functions ───
 
-export function pavilionLog(
+export function pavilionMfeLog(
   module: LogModule,
   event: string,
   detail: Record<string, unknown> = {}
@@ -95,7 +95,7 @@ export function pavilionLog(
     const from = detail.from as string[] | undefined
     const to = detail.to as string[] | undefined
     console.log(
-      '%c[Pavilion]%c %s%c %s%c %s → %s',
+      '%c[PavilionMfe]%c %s%c %s%c %s → %s',
       STYLE_PREFIX,
       STYLE_MODULE, module,
       STYLE_EVENT, event,
@@ -106,11 +106,11 @@ export function pavilionLog(
     return
   }
 
-  // Generic format: [Pavilion] module  event  key=value  key=value
+  // Generic format: [PavilionMfe] module  event  key=value  key=value
   const pairs = formatPairs(detail)
   if (pairs) {
     console.log(
-      '%c[Pavilion]%c %s%c %s%c %s',
+      '%c[PavilionMfe]%c %s%c %s%c %s',
       STYLE_PREFIX,
       STYLE_MODULE, module,
       STYLE_EVENT, event,
@@ -118,7 +118,7 @@ export function pavilionLog(
     )
   } else {
     console.log(
-      '%c[Pavilion]%c %s%c %s',
+      '%c[PavilionMfe]%c %s%c %s',
       STYLE_PREFIX,
       STYLE_MODULE, module,
       STYLE_EVENT, event
@@ -126,7 +126,7 @@ export function pavilionLog(
   }
 }
 
-export function pavilionError(
+export function pavilionMfeError(
   module: LogModule,
   event: string,
   detail: Record<string, unknown> = {}
@@ -136,7 +136,7 @@ export function pavilionError(
   const pairs = formatPairs(detail)
   if (pairs) {
     console.error(
-      '%c[Pavilion]%c %s%c %s%c %s',
+      '%c[PavilionMfe]%c %s%c %s%c %s',
       STYLE_PREFIX,
       STYLE_MODULE, module,
       STYLE_ERROR, event,
@@ -144,7 +144,7 @@ export function pavilionError(
     )
   } else {
     console.error(
-      '%c[Pavilion]%c %s%c %s',
+      '%c[PavilionMfe]%c %s%c %s',
       STYLE_PREFIX,
       STYLE_MODULE, module,
       STYLE_ERROR, event

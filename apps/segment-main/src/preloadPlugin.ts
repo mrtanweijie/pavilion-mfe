@@ -1,5 +1,5 @@
 /**
- * Pavilion runtime preload plugin for Module Federation.
+ * PavilionMfe runtime preload plugin for Module Federation.
  *
  * ① beforeInit: dynamically register all segments as MF remotes
  *    (no need to statically declare them in vite.config.ts)
@@ -10,8 +10,8 @@
 import mfeConfig from '../mfe.json'
 import { loadRemote, preloadRemote } from '@module-federation/runtime'
 
-// ─── Inline logger (reads same global config as @pavilion/sandbox) ───
-// Avoids importing @pavilion/* packages at MF runtime init time.
+// ─── Inline logger (reads same global config as @pavilion-mfe/sandbox) ───
+// Avoids importing @pavilion-mfe/* packages at MF runtime init time.
 const ST_PX = 'color:#42b883;font-weight:bold'
 const ST_MOD = 'color:#00b4d8;font-weight:bold'
 const ST_EVT = 'color:#e8a838;font-weight:bold'
@@ -19,16 +19,16 @@ const ST_DIM = 'color:#999'
 
 function preloadLog(event: string, detail: Record<string, unknown> = {}): void {
   const g = globalThis as Record<string, any>
-  const config = g.__PAVILION_LOG__
+  const config = g.__PAVILION_MFE_LOG__
   if (config?.enabled === false) return
   if (config?.modules?.preload === false) return
   const pairs = Object.entries(detail)
     .map(([k, v]) => `${k}=${typeof v === 'string' ? v : JSON.stringify(v)}`)
     .join('  ')
   if (pairs) {
-    console.log('%c[Pavilion]%c preload%c %s%c %s', ST_PX, ST_MOD, ST_EVT, event, ST_DIM, pairs)
+    console.log('%c[PavilionMfe]%c preload%c %s%c %s', ST_PX, ST_MOD, ST_EVT, event, ST_DIM, pairs)
   } else {
-    console.log('%c[Pavilion]%c preload%c %s', ST_PX, ST_MOD, ST_EVT, event)
+    console.log('%c[PavilionMfe]%c preload%c %s', ST_PX, ST_MOD, ST_EVT, event)
   }
 }
 
@@ -78,7 +78,7 @@ function preload(): void {
       })
       .catch((err) => {
         preloadLog('preload-current', { appCode: currentApp.appCode, status: 'failed' })
-        console.error(`[Pavilion] Preload failed for ${currentApp.appCode}:`, err)
+        console.error(`[PavilionMfe] Preload failed for ${currentApp.appCode}:`, err)
       })
   }
 
@@ -95,7 +95,7 @@ function preload(): void {
       })
       .catch((err) => {
         preloadLog('preload-others', { status: 'failed' })
-        console.error('[Pavilion] Preload of other segments failed:', err)
+        console.error('[PavilionMfe] Preload of other segments failed:', err)
       })
   }, 1000)
 }
@@ -105,14 +105,14 @@ export default function () {
   Promise.resolve().then(() => preload())
 
   return {
-    name: 'pavilion-preload',
+    name: 'pavilion-mfe-preload',
 
     /**
      * Register all segments as MF remotes at runtime.
-     * This replaces static `pavilionRemotes` / `remotes` in vite.config.ts.
+     * This replaces static `pavilionMfeRemotes` / `remotes` in vite.config.ts.
      */
     beforeInit(args: any) {
-      const globalCdn = (import.meta.env.VITE_PAVILION_CDN || '') as string
+      const globalCdn = (import.meta.env.VITE_PAVILION_MFE_CDN || '') as string
       args.options.remotes.push(
         ...apps.map((app) => {
           const appCdn = app.cdn || globalCdn

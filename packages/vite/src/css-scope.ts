@@ -8,10 +8,10 @@
  *   .container .title { font-size: 12px; }
  *   @keyframes fade { from { opacity: 0; } }
  *
- * Output (prefix = 'pavilion-dashboard'):
- *   :where(.pavilion-dashboard) .card { color: red; }
- *   :where(.pavilion-dashboard) .container .title { font-size: 12px; }
- *   @keyframes pavilion-dashboard-fade { from { opacity: 0; } }
+ * Output (prefix = 'pavilion-mfe-dashboard'):
+ *   :where(.pavilion-mfe-dashboard) .card { color: red; }
+ *   :where(.pavilion-mfe-dashboard) .container .title { font-size: 12px; }
+ *   @keyframes pavilion-mfe-dashboard-fade { from { opacity: 0; } }
  *
  * :where() wraps the scope class with zero specificity, so scoped
  * styles keep the same specificity as the original selectors.
@@ -20,7 +20,7 @@
 import type { Plugin, Rule, AtRule } from 'postcss'
 
 export interface CssScopeOptions {
-  /** CSS class prefix, e.g. 'pavilion-dashboard' */
+  /** CSS class prefix, e.g. 'pavilion-mfe-dashboard' */
   prefix: string
   /** Regex patterns for files that should NOT be scoped */
   exclude?: RegExp[]
@@ -86,7 +86,7 @@ export function cssScopePlugin(options: CssScopeOptions): Plugin {
   const { prefix, exclude, include } = options
 
   return {
-    postcssPlugin: 'pavilion-css-scope',
+    postcssPlugin: 'pavilion-mfe-css-scope',
 
     Rule(rule: Rule) {
       // Skip keyframe selectors (0%, 100%, from, to) inside @keyframes —
@@ -123,7 +123,7 @@ export function cssScopePlugin(options: CssScopeOptions): Plugin {
 
     OnceExit() {
       console.log(
-        `[Pavilion] CSS scope: prefix=${prefix}  selectors=${scopedSelectors}  skipped=${skippedSelectors}  keyframes=${scopedKeyframes}`
+        `[PavilionMfe] CSS scope: prefix=${prefix}  selectors=${scopedSelectors}  skipped=${skippedSelectors}  keyframes=${scopedKeyframes}`
       )
       // Reset for next file
       scopedSelectors = 0

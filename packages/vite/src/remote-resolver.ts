@@ -41,7 +41,7 @@ export function resolveRemotes(
     const match = value.match(/(.+)@(.+)/)
     if (!match) {
       throw new Error(
-        `[Pavilion] Invalid remote format for '${key}': '${value}'. Expected 'pkg@version'.`
+        `[PavilionMfe] Invalid remote format for '${key}': '${value}'. Expected 'pkg@version'.`
       )
     }
 

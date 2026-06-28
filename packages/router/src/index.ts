@@ -1,6 +1,6 @@
 export { createRouter } from './create-router.js'
 export { matchAppByPath, navigateTo, createPathMatcher } from './match-app.js'
-export { isPavilionShell } from './env.js'
+export { isPavilionMfeShell } from './env.js'
 export type {
   SegmentApp,
   SegmentLifecycle,
@@ -14,11 +14,11 @@ export type {
   HookContext,
 } from './types.js'
 
-// Re-export logger from @pavilion/sandbox for convenience
+// Re-export logger from @pavilion-mfe/sandbox for convenience
 export {
-  pavilionLog,
-  pavilionError,
+  pavilionMfeLog,
+  pavilionMfeError,
   configureLog,
   isLogEnabled,
-} from '@pavilion/sandbox'
-export type { LogModule, PavilionLogConfig } from '@pavilion/sandbox'
+} from '@pavilion-mfe/sandbox'
+export type { LogModule, PavilionMfeLogConfig } from '@pavilion-mfe/sandbox'

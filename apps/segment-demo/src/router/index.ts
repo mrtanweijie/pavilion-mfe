@@ -34,7 +34,7 @@ export function createDemoRouter(history?: RouterHistory) {
   })
 
   // 404 重定向守卫：在组件加载/渲染之前同步执行，
-  // 确保 URL 在 Pavilion reroute 运行前就已变为 /404，
+  // 确保 URL 在 PavilionMfe reroute 运行前就已变为 /404，
   // 避免段被 restore 后用户短暂看到 App.vue 内容的竞态问题。
   router.beforeEach((to) => {
     if (

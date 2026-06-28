@@ -1,5 +1,5 @@
 {
-  "name": "@pavilion/demo-segment",
+  "name": "@pavilion-mfe/demo-segment",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -19,7 +19,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.1.0",
-    "@pavilion/vite": "workspace:*",
+    "@pavilion-mfe/vite": "workspace:*",
     "vite": "^5.4.0"
   }
 }

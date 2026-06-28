@@ -1,8 +1,8 @@
 export { Sandbox, getActiveSandbox, setRouteMatcher } from './sandbox.js'
 export {
-  pavilionLog,
-  pavilionError,
+  pavilionMfeLog,
+  pavilionMfeError,
   configureLog,
   isLogEnabled,
 } from './logger.js'
-export type { LogModule, PavilionLogConfig } from './logger.js'
+export type { LogModule, PavilionMfeLogConfig } from './logger.js'

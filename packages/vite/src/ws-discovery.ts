@@ -12,7 +12,7 @@ const WS_PORT = 8356
 
 /**
  * Creates a Vite plugin that broadcasts this dev server's port
- * to the Pavilion WS discovery service on start.
+ * to the PavilionMfe WS discovery service on start.
  */
 export function wsDiscoveryPlugin(options: {
   port?: number
@@ -27,13 +27,13 @@ export function wsDiscoveryPlugin(options: {
       wsClient = ws
 
       ws.onopen = () => {
-        console.log(`[Pavilion] Connected to dev discovery service`)
+        console.log(`[PavilionMfe] Connected to dev discovery service`)
         resolve()
       }
 
       ws.onerror = (err) => {
         // WS may not be running in standalone mode — that's fine
-        console.debug('[Pavilion] Dev discovery service not available')
+        console.debug('[PavilionMfe] Dev discovery service not available')
         reject(err)
       }
     })
@@ -48,7 +48,7 @@ export function wsDiscoveryPlugin(options: {
   }
 
   return {
-    name: 'pavilion:ws-discovery',
+    name: 'pavilion-mfe:ws-discovery',
 
     async configureServer(server) {
       const resolvedPort = server.config.server.port ?? 5173

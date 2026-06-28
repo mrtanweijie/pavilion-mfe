@@ -1,18 +1,18 @@
-/** Built-in Pavilion routing events dispatched by createRouter.
+/** Built-in PavilionMfe routing events dispatched by createRouter.
  *  These match the event names used by window.dispatchEvent in create-router.ts. */
 export enum MFEEvent {
   /** Fired before shell routing (pushState/replaceState/popstate/init) */
-  BEFORE_ROUTING = 'pavilion:before-routing',
+  BEFORE_ROUTING = 'pavilion-mfe:before-routing',
   /** Fired after shell routing completes */
-  AFTER_ROUTING = 'pavilion:after-routing',
+  AFTER_ROUTING = 'pavilion-mfe:after-routing',
   /** Fired when switching from one segment to another */
-  SEGMENT_SWITCH = 'pavilion:segment-switch',
+  SEGMENT_SWITCH = 'pavilion-mfe:segment-switch',
   /** Fired before a segment is cached (keep-alive) */
-  BEFORE_CACHE = 'pavilion:before-cache',
+  BEFORE_CACHE = 'pavilion-mfe:before-cache',
   /** Fired after a cached segment is restored */
-  AFTER_RESTORE = 'pavilion:after-restore',
+  AFTER_RESTORE = 'pavilion-mfe:after-restore',
   /** Fired when a segment encounters an error */
-  SEGMENT_ERROR = 'pavilion:segment-error',
+  SEGMENT_ERROR = 'pavilion-mfe:segment-error',
 }
 
 export interface RouteChangeDetail {

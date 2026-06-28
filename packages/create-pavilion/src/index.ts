@@ -7,13 +7,13 @@ const TEMPLATES: Record<string, Record<string, string>> = {
   'segment-main.ts': {
     path: 'src/segment-main.ts',
     content: `/**
- * Pavilion segment lifecycle entry.
+ * PavilionMfe segment lifecycle entry.
  * Export mount/unmount to be loaded by the Shell.
  */
 export default {
   mount: async (ctx: { appCode: string; basename: string }, el: HTMLElement) => {
     // Your mount logic here
-    el.innerHTML = '<h1>Hello from Pavilion!</h1>'
+    el.innerHTML = '<h1>Hello from PavilionMfe!</h1>'
   },
   unmount: async () => {
     // Cleanup
@@ -24,11 +24,11 @@ export default {
   'vite.config.ts': {
     path: 'vite.config.ts',
     content: `import { defineConfig } from 'vite'
-import { pavilion } from '@pavilion/vite'
+import { PavilionMfe } from '@pavilion-mfe/vite'
 
 export default defineConfig({
   plugins: [
-    pavilion({
+    PavilionMfe({
       role: 'segment',
       name: process.env.npm_package_name ?? 'my-app',
       exposes: { './main': './src/segment-main.ts' },
@@ -46,7 +46,7 @@ export default defineConfig({
     path: 'package.json',
     content: JSON.stringify(
       {
-        name: 'my-pavilion-segment',
+        name: 'my-pavilion-mfe-segment',
         version: '0.1.0',
         private: true,
         type: 'module',
@@ -64,7 +64,7 @@ export default defineConfig({
     path: 'index.html',
     content: `<!DOCTYPE html>
 <html lang="en">
-<head><meta charset="UTF-8" /><title>My Pavilion Segment</title></head>
+<head><meta charset="UTF-8" /><title>My PavilionMfe Segment</title></head>
 <body><div id="app"></div><script type="module" src="/src/main.ts"></script></body>
 </html>
 `,
@@ -72,7 +72,7 @@ export default defineConfig({
 }
 
 async function main(): Promise<void> {
-  const projectName = process.argv[2] ?? 'my-pavilion-app'
+  const projectName = process.argv[2] ?? 'my-pavilion-mfe-app'
   const projectDir = resolve(process.cwd(), projectName)
 
   if (existsSync(projectDir)) {
@@ -90,7 +90,7 @@ async function main(): Promise<void> {
     writeFileSync(filePath, template.content, 'utf-8')
   }
 
-  console.log(`✅ Created Pavilion app at ${projectDir}`)
+  console.log(`✅ Created PavilionMfe app at ${projectDir}`)
   console.log()
   console.log('  cd', projectName)
   console.log('  npm install')

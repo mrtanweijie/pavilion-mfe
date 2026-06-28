@@ -62,7 +62,7 @@ function mapPathConfigToRoute(cfg: Record<string, unknown>): any[] {
 
 /**
  * In Shell mode: redirect to the Shell's /404 page via replaceState +
- * synthetic popstate (triggers Pavilion router to unmount this segment
+ * synthetic popstate (triggers PavilionMfe router to unmount this segment
  * and Shell's router to render the 404 page).
  * Uses useLayoutEffect to fire before browser paint, preventing the
  * user from briefly seeing the segment's App.tsx heading.

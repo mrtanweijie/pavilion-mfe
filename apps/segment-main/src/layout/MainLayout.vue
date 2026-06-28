@@ -3,7 +3,7 @@
     <Sidebar />
     <el-main class="main">
       <router-view v-show="!isSegmentRoute" />
-      <div id="pavilion-container" v-show="isSegmentRoute"></div>
+      <div id="pavilion-mfe-container" v-show="isSegmentRoute"></div>
     </el-main>
   </el-container>
 </template>
@@ -11,7 +11,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
-import { createPathMatcher } from '@pavilion/router'
+import { createPathMatcher } from '@pavilion-mfe/router'
 import Sidebar from './Sidebar.vue'
 import mfeConfig from '../../mfe.json'
 
@@ -67,7 +67,7 @@ body,
 }
 
 /* 微前端容器 */
-#pavilion-container {
+#pavilion-mfe-container {
   height: 100%;
   min-height: 400px;
 }

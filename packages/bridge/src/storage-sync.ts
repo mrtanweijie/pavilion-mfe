@@ -41,7 +41,7 @@ export class StorageSync {
       localStorage.setItem(key, JSON.stringify(value))
       this.publish(key, value)
     } catch (e) {
-      console.error('[Pavilion StorageSync] set failed:', e)
+      console.error('[PavilionMfe StorageSync] set failed:', e)
     }
   }
 

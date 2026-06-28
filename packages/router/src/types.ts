@@ -1,4 +1,4 @@
-import type { Sandbox } from '@pavilion/sandbox'
+import type { Sandbox } from '@pavilion-mfe/sandbox'
 
 export interface SegmentApp {
   name: string

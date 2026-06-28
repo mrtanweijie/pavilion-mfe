@@ -1,5 +1,5 @@
 import type { SegmentApp, RegisteredApp, RouterConfig, RouterHooks, HookContext } from './types.js'
-import { Sandbox, setRouteMatcher, pavilionLog } from '@pavilion/sandbox'
+import { Sandbox, setRouteMatcher, pavilionMfeLog } from '@pavilion-mfe/sandbox'
 
 /**
  * Micro-frontend lifecycle router.
@@ -19,12 +19,12 @@ export function createRouter(config?: RouterConfig) {
   const keepAliveMap = new Map<string, { keepAlive: boolean; cachedAt: number }>()
 
   /**
-   * Dispatch a Pavilion routing event.
-   * Events: pavilion:before-routing, pavilion:after-routing, pavilion:segment-switch,
-   *         pavilion:before-cache, pavilion:after-restore, pavilion:segment-error
+   * Dispatch a PavilionMfe routing event.
+   * Events: pavilion-mfe:before-routing, pavilion-mfe:after-routing, pavilion-mfe:segment-switch,
+   *         pavilion-mfe:before-cache, pavilion-mfe:after-restore, pavilion-mfe:segment-error
    */
   function dispatch(name: string, detail: Record<string, unknown>): void {
-    pavilionLog('router', name.replace('pavilion:', ''), detail)
+    pavilionMfeLog('router', name.replace('pavilion-mfe:', ''), detail)
     window.dispatchEvent(new CustomEvent(name, { detail }))
   }
 
@@ -63,7 +63,7 @@ export function createRouter(config?: RouterConfig) {
       keepAlive: app.keepAlive ?? false,
       cachedAt: 0,
     })
-    pavilionLog('router', 'segment-register', { appCode: app.name, keepAlive: app.keepAlive ?? false, basename: app.basename ?? '' })
+    pavilionMfeLog('router', 'segment-register', { appCode: app.name, keepAlive: app.keepAlive ?? false, basename: app.basename ?? '' })
   }
 
   function getContainer(name: string): HTMLElement {
@@ -72,8 +72,8 @@ export function createRouter(config?: RouterConfig) {
 
     const div = document.createElement('div')
     div.id = name
-    div.classList.add(`pavilion-${name}`)
-    document.getElementById('pavilion-container')?.appendChild(div)
+    div.classList.add(`pavilion-mfe-${name}`)
+    document.getElementById('pavilion-mfe-container')?.appendChild(div)
     return div
   }
 
@@ -94,12 +94,12 @@ export function createRouter(config?: RouterConfig) {
       }
       app.status = 'NOT_MOUNTED'
       const ms = Math.round(performance.now() - t0)
-      pavilionLog('router', 'segment-load', { appCode: app.name, ms })
+      pavilionMfeLog('router', 'segment-load', { appCode: app.name, ms })
       hooks?.afterLoad?.(makeHookCtx(app, ms))
     } catch (err) {
       const ms = Math.round(performance.now() - t0)
-      pavilionLog('router', 'segment-error', { appCode: app.name, phase: 'load', error: String(err) })
-      dispatch('pavilion:segment-error', { appCode: app.name, phase: 'load', error: String(err), ms })
+      pavilionMfeLog('router', 'segment-error', { appCode: app.name, phase: 'load', error: String(err) })
+      dispatch('pavilion-mfe:segment-error', { appCode: app.name, phase: 'load', error: String(err), ms })
       hooks?.onError?.(makeHookCtx(app, ms, err))
       app.status = 'NOT_LOADED'
     }
@@ -118,8 +118,8 @@ export function createRouter(config?: RouterConfig) {
       app.container.style.display = 'block'
     }
     app.status = 'MOUNTED'
-    pavilionLog('router', 'segment-restore', { appCode: app.name })
-    dispatch('pavilion:after-restore', { appCode: app.name })
+    pavilionMfeLog('router', 'segment-restore', { appCode: app.name })
+    dispatch('pavilion-mfe:after-restore', { appCode: app.name })
     hooks?.afterRestore?.(makeHookCtx(app))
   }
 
@@ -145,7 +145,7 @@ export function createRouter(config?: RouterConfig) {
     app.cleanup = cleanup ?? null
     app.status = 'MOUNTED'
     const ms = Math.round(performance.now() - t0)
-    pavilionLog('router', 'segment-mount', { appCode: app.name, ms })
+    pavilionMfeLog('router', 'segment-mount', { appCode: app.name, ms })
     hooks?.afterMount?.(makeHookCtx(app, ms))
   }
 
@@ -169,7 +169,7 @@ export function createRouter(config?: RouterConfig) {
     }
 
     // Full unmount the evicted app
-    pavilionLog('router', 'segment-evict', { appCode: oldest.name, reason: 'LRU' })
+    pavilionMfeLog('router', 'segment-evict', { appCode: oldest.name, reason: 'LRU' })
     oldest.sandbox?.deactivate()
     oldest.sandbox = null
     if (oldest.cleanup) {
@@ -212,8 +212,8 @@ export function createRouter(config?: RouterConfig) {
       app.status = 'CACHED'
       if (meta) meta.cachedAt = Date.now()
       const ms = Math.round(performance.now() - t0)
-      pavilionLog('router', 'segment-cache', { appCode: app.name, ms })
-      dispatch('pavilion:before-cache', { appCode: app.name })
+      pavilionMfeLog('router', 'segment-cache', { appCode: app.name, ms })
+      dispatch('pavilion-mfe:before-cache', { appCode: app.name })
       hooks?.beforeCache?.(makeHookCtx(app, ms))
       hooks?.afterUnmount?.(makeHookCtx(app, ms))
       return
@@ -240,7 +240,7 @@ export function createRouter(config?: RouterConfig) {
     }
     app.status = 'NOT_MOUNTED'
     const ms = Math.round(performance.now() - t0)
-    pavilionLog('router', 'segment-unmount', { appCode: app.name, ms })
+    pavilionMfeLog('router', 'segment-unmount', { appCode: app.name, ms })
     hooks?.afterUnmount?.(makeHookCtx(app, ms))
   }
 
@@ -269,7 +269,7 @@ export function createRouter(config?: RouterConfig) {
       app.status = 'NOT_MOUNTED'
       const meta = keepAliveMap.get(app.name)
       if (meta) meta.cachedAt = 0
-      pavilionLog('router', 'segment-clear-cache', { appCode: app.name })
+      pavilionMfeLog('router', 'segment-clear-cache', { appCode: app.name })
     }
   }
 
@@ -313,7 +313,7 @@ export function createRouter(config?: RouterConfig) {
     const currentCodes = matchActiveApps().map((a) => a.name).sort()
     const prevSorted = [...prevActiveAppCodes].sort()
     if (JSON.stringify(currentCodes) !== JSON.stringify(prevSorted)) {
-      dispatch('pavilion:segment-switch', { from: prevActiveAppCodes, to: currentCodes })
+      dispatch('pavilion-mfe:segment-switch', { from: prevActiveAppCodes, to: currentCodes })
       prevActiveAppCodes = currentCodes
     }
   }
@@ -332,10 +332,10 @@ export function createRouter(config?: RouterConfig) {
       currentPath = path
       const activeApps = matchActiveApps()
       const appCode = activeApps.length > 0 ? activeApps[0].name : ''
-      dispatch('pavilion:before-routing', { url, trigger, path, appCode })
+      dispatch('pavilion-mfe:before-routing', { url, trigger, path, appCode })
       setTimeout(() => {
         reroute().then(() => {
-          dispatch('pavilion:after-routing', { url, trigger, path, appCode })
+          dispatch('pavilion-mfe:after-routing', { url, trigger, path, appCode })
         })
       }, 0)
     }
@@ -366,10 +366,10 @@ export function createRouter(config?: RouterConfig) {
   }
 
   function start(): void {
-    pavilionLog('router', 'router-start', { segments: apps.length, maxCache })
+    pavilionMfeLog('router', 'router-start', { segments: apps.length, maxCache })
 
     // Mark the global environment so segment apps can detect Shell mode
-    // via isPavilionShell() without querying the DOM.
+    // via isPavilionMfeShell() without querying the DOM.
     ;(globalThis as Record<string, unknown>).__PAVILION_MFE_ENV__ = true
 
     // Set up route isolation: segment popstate listeners only fire when
@@ -389,10 +389,10 @@ export function createRouter(config?: RouterConfig) {
     currentPath = initPath
     const initApps = matchActiveApps()
     const initAppCode = initApps.length > 0 ? initApps[0].name : ''
-    dispatch('pavilion:before-routing', { url, trigger: 'init', path: initPath, appCode: initAppCode })
+    dispatch('pavilion-mfe:before-routing', { url, trigger: 'init', path: initPath, appCode: initAppCode })
     setTimeout(() => {
       reroute().then(() => {
-        dispatch('pavilion:after-routing', { url, trigger: 'init', path: initPath, appCode: initAppCode })
+        dispatch('pavilion-mfe:after-routing', { url, trigger: 'init', path: initPath, appCode: initAppCode })
       })
     }, 0)
   }

@@ -1,5 +1,5 @@
 {
-  "name": "@pavilion/router",
+  "name": "@pavilion-mfe/router",
   "version": "0.1.0",
   "type": "module",
   "exports": {
@@ -15,7 +15,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@pavilion/sandbox": "workspace:*"
+    "@pavilion-mfe/sandbox": "workspace:*"
   },
   "publishConfig": {
     "access": "public"

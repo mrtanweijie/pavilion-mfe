@@ -3,18 +3,18 @@ import { createRoot } from 'react-dom/client'
 import App from './App'
 import { createSegmentRouter, createStandaloneRouter } from './router'
 
-const appCode = import.meta.env.VITE_PAVILION_APP_CODE
-const pavilionEnv = import.meta.env.VITE_PAVILION_ENV || 'develop'
+const appCode = import.meta.env.VITE_PAVILION_MFE_APP_CODE
+const pavilionMfeEnv = import.meta.env.VITE_PAVILION_MFE_ENV || 'develop'
 const apiBase = import.meta.env.VITE_BASE_API_URL || ''
-const cdn = import.meta.env.VITE_PAVILION_CDN || ''
+const cdn = import.meta.env.VITE_PAVILION_MFE_CDN || ''
 
 const ST_PX = 'color:#42b883;font-weight:bold'
 const ST_KEY = 'color:#999'
 const ST_VAL = 'color:#00b4d8;font-weight:bold'
 console.log(
-  '%c[Pavilion 微前端]%c %s\n  %cenv%c %s  %capi%c %s  %ccdn%c %s',
+  '%c[PavilionMfe 微前端]%c %s\n  %cenv%c %s  %capi%c %s  %ccdn%c %s',
   ST_PX, '', appCode,
-  ST_KEY, ST_VAL, pavilionEnv,
+  ST_KEY, ST_VAL, pavilionMfeEnv,
   ST_KEY, ST_VAL, apiBase || '-',
   ST_KEY, ST_VAL, cdn || '(relative)',
 )
@@ -23,7 +23,7 @@ console.log(
 export default {
   mount: async (_ctx: any, el: HTMLElement) => {
     
-    console.log('[Pavilion 微前端] mount', appCode)
+    console.log('[PavilionMfe 微前端] mount', appCode)
 
     const router = createSegmentRouter(_ctx?.basename)
     const root = createRoot(el)
@@ -35,7 +35,7 @@ export default {
     return () => root.unmount()
   },
   unmount: async (_ctx: any, el: HTMLElement) => {
-    console.log('[Pavilion 微前端] unmount', appCode)
+    console.log('[PavilionMfe 微前端] unmount', appCode)
     el.innerHTML = ''
   },
 }
@@ -46,7 +46,7 @@ if (!window.__PAVILION_MFE_ENV__) {
   if (rootEl) {
     console.log('子应用独立运行 standalone', appCode)
 
-    rootEl.classList.add(`pavilion-${appCode}`)
+    rootEl.classList.add(`pavilion-mfe-${appCode}`)
 
     const router = createStandaloneRouter()
     const root = createRoot(rootEl)

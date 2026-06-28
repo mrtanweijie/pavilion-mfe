@@ -1,16 +1,16 @@
 /**
- * Pavilion environment detection.
+ * PavilionMfe environment detection.
  *
- * The Shell's Pavilion router sets `window.__PAVILION_MFE_ENV__ = true` when
+ * The Shell's PavilionMfe router sets `window.__PAVILION_MFE_ENV__ = true` when
  * `start()` is called — before any segment app is loaded. Segment apps
- * can use `isPavilionShell()` to detect whether they are running inside
+ * can use `isPavilionMfeShell()` to detect whether they are running inside
  * the Shell (micro-frontend mode) or standalone.
  *
  * @example
- * import { isPavilionShell } from '@pavilion/router'
+ * import { isPavilionMfeShell } from '@pavilion-mfe/router'
  *
- * if (isPavilionShell()) {
- *   // Running inside the Pavilion Shell
+ * if (isPavilionMfeShell()) {
+ *   // Running inside the PavilionMfe Shell
  * } else {
  *   // Running standalone
  * }
@@ -23,11 +23,11 @@ declare global {
 }
 
 /**
- * Check if running inside a Pavilion Shell (micro-frontend environment).
+ * Check if running inside a PavilionMfe Shell (micro-frontend environment).
  *
  * The global `window.__PAVILION_MFE_ENV__` is injected by the Shell's
- * Pavilion router during `start()`, before segments are loaded.
+ * PavilionMfe router during `start()`, before segments are loaded.
  */
-export function isPavilionShell(): boolean {
+export function isPavilionMfeShell(): boolean {
   return typeof window !== 'undefined' && !!window.__PAVILION_MFE_ENV__
 }

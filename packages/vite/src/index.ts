@@ -2,7 +2,7 @@ import type { PluginOption } from 'vite'
 import { federation as mfFederation } from '@module-federation/vite'
 import type { ModuleFederationOptions } from '@module-federation/vite'
 import topAwait from 'vite-plugin-top-level-await'
-import type { PavilionPluginOptions } from './config-types.js'
+import type { PavilionMfePluginOptions } from './config-types.js'
 import { resolveRemotes } from './remote-resolver.js'
 import { wsDiscoveryPlugin } from './ws-discovery.js'
 import { cssScopePlugin } from './css-scope.js'
@@ -10,25 +10,25 @@ import { cssScopePlugin } from './css-scope.js'
 export { resolveRemotes, wsDiscoveryPlugin, cssScopePlugin }
 export type * from './config-types.js'
 
-export function pavilion(options: PavilionPluginOptions): PluginOption[] {
+export function PavilionMfe(options: PavilionMfePluginOptions): PluginOption[] {
   const plugins: PluginOption[] = []
 
   // ─── 0. Resolve environment config ───
-  const env = options.env ?? process.env.VITE_PAVILION_ENV ?? 'develop'
+  const env = options.env ?? process.env.VITE_PAVILION_MFE_ENV ?? 'develop'
   const cdn = options.cdn ?? ''
 
   // ─── 0b. Inject env vars into import.meta.env ───
   plugins.push({
-    name: 'pavilion:env-inject',
+    name: 'pavilion-mfe:env-inject',
     config: (config) => {
       const define = config.define ?? (config.define = {})
-      ;(define as Record<string, string>)['import.meta.env.VITE_PAVILION_ENV'] = JSON.stringify(env)
+      ;(define as Record<string, string>)['import.meta.env.VITE_PAVILION_MFE_ENV'] = JSON.stringify(env)
     },
   } as PluginOption)
 
   // ─── 1. Build config: base URL + optimizations ───
   plugins.push({
-    name: 'pavilion:build-config',
+    name: 'pavilion-mfe:build-config',
     apply: 'build',
     config: (config) => {
       if (options.role === 'segment' || options.role === 'runtime') {
@@ -78,7 +78,7 @@ export function pavilion(options: PavilionPluginOptions): PluginOption[] {
   // at runtime, so we just need Rollup to not resolve it at build time.
   // enforce: 'pre' ensures this runs BEFORE Vite's built-in resolver.
   plugins.push({
-    name: 'pavilion:external',
+    name: 'pavilion-mfe:external',
     enforce: 'pre',
     apply: 'build',
     resolveId(id) {
@@ -92,7 +92,7 @@ export function pavilion(options: PavilionPluginOptions): PluginOption[] {
   // Required for MF shared modules that use top-level await syntax.
   // Injected only in build mode to avoid interfering with dev ESM.
   plugins.push({
-    name: 'pavilion:top-await',
+    name: 'pavilion-mfe:top-await',
     apply: 'build',
     config: () => ({
       plugins: [topAwait()],
@@ -102,7 +102,7 @@ export function pavilion(options: PavilionPluginOptions): PluginOption[] {
   // ─── 1c. Dev server proxy ───
   if (options.proxy) {
     plugins.push({
-      name: 'pavilion:proxy',
+      name: 'pavilion-mfe:proxy',
       apply: 'serve',
       config: (config) => {
         const server = config.server ?? (config.server = {})
@@ -113,11 +113,11 @@ export function pavilion(options: PavilionPluginOptions): PluginOption[] {
 
   // ─── 2. Module Federation ───
   const mfOptions: ModuleFederationOptions = {
-    name: options.name ?? 'pavilion-app',
+    name: options.name ?? 'pavilion-mfe-app',
   }
 
-  if (options.pavilionRemotes && Object.keys(options.pavilionRemotes).length > 0) {
-    const resolved = resolveRemotes(options.pavilionRemotes, { cdn })
+  if (options.pavilionMfeRemotes && Object.keys(options.pavilionMfeRemotes).length > 0) {
+    const resolved = resolveRemotes(options.pavilionMfeRemotes, { cdn })
     mfOptions.remotes = { ...resolved, ...options.remotes }
   } else if (options.remotes && Object.keys(options.remotes).length > 0) {
     mfOptions.remotes = options.remotes
@@ -140,10 +140,10 @@ export function pavilion(options: PavilionPluginOptions): PluginOption[] {
 
   // ─── 3. CSS Scope (segment builds only) ───
   if (options.role === 'segment' || options.role === 'runtime') {
-    const scopePrefix = `pavilion-${options.name ?? 'unknown'}`
+    const scopePrefix = `pavilion-mfe-${options.name ?? 'unknown'}`
 
     plugins.push({
-      name: 'pavilion:css-scope',
+      name: 'pavilion-mfe:css-scope',
       enforce: 'post',
       config: (config) => {
         const cssConfig = config.css = config.css ?? {}

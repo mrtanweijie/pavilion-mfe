@@ -1,7 +1,7 @@
 {
-  "name": "@pavilion/runtime",
+  "name": "@pavilion-mfe/runtime",
   "version": "0.1.0",
-  "description": "Pavilion shared runtime — designed to be a Module Federation remote",
+  "description": "PavilionMfe shared runtime — designed to be a Module Federation remote",
   "type": "module",
   "files": ["dist"],
   "scripts": {
@@ -10,9 +10,9 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@pavilion/router": "workspace:*",
-    "@pavilion/bridge": "workspace:*",
-    "@pavilion/sandbox": "workspace:*"
+    "@pavilion-mfe/router": "workspace:*",
+    "@pavilion-mfe/bridge": "workspace:*",
+    "@pavilion-mfe/sandbox": "workspace:*"
   },
   "publishConfig": {
     "access": "public"

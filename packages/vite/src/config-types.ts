@@ -10,11 +10,11 @@ export interface FederationUserOptions {
   manifest?: boolean | { fileName?: string; filePath?: string }
 }
 
-export interface PavilionPluginOptions extends FederationUserOptions {
+export interface PavilionMfePluginOptions extends FederationUserOptions {
   role: 'shell' | 'segment' | 'runtime' | 'login'
 
   /** pkg@version → resolves to CDN manifest URL */
-  pavilionRemotes?: Record<string, string>
+  pavilionMfeRemotes?: Record<string, string>
 
   /** Build-time CDN base URL */
   cdn?: string
@@ -37,6 +37,6 @@ export interface PavilionPluginOptions extends FederationUserOptions {
   /** Dev server proxy rules (dev mode only) */
   proxy?: Record<string, string | ProxyOptions>
 
-  /** Current environment (e.g. 'develop', 'production'). Falls back to VITE_PAVILION_ENV env var. */
+  /** Current environment (e.g. 'develop', 'production'). Falls back to VITE_PAVILION_MFE_ENV env var. */
   env?: string
 }

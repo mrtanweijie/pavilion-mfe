@@ -34,7 +34,7 @@ function broadcastPortList(): void {
 export function startWsServer(): void {
   const wss = new WebSocketServer({ port: PORT })
 
-  console.log(`[Pavilion WS] Dev discovery service started on port ${PORT}`)
+  console.log(`[PavilionMfe WS] Dev discovery service started on port ${PORT}`)
 
   wss.on('connection', (ws, req) => {
     const isBrowser = (req.headers['sec-websocket-protocol'] ?? '') === 'browser'
@@ -52,13 +52,13 @@ export function startWsServer(): void {
 
         if (msg.action === 'add' && msg.port) {
           portList.set(msg.port, { port: msg.port, name: msg.name })
-          console.log(`[Pavilion WS] Registered: ${msg.name ?? 'unknown'} on port ${msg.port}`)
+          console.log(`[PavilionMfe WS] Registered: ${msg.name ?? 'unknown'} on port ${msg.port}`)
           broadcastPortList()
         }
 
         if (msg.action === 'remove' && msg.port) {
           portList.delete(msg.port)
-          console.log(`[Pavilion WS] Removed: port ${msg.port}`)
+          console.log(`[PavilionMfe WS] Removed: port ${msg.port}`)
           broadcastPortList()
         }
 
@@ -78,9 +78,9 @@ export function startWsServer(): void {
 
   wss.on('error', (err) => {
     if ((err as NodeJS.ErrnoException).code === 'EADDRINUSE') {
-      console.log(`[Pavilion WS] Port ${PORT} already in use — discovery service already running`)
+      console.log(`[PavilionMfe WS] Port ${PORT} already in use — discovery service already running`)
     } else {
-      console.error('[Pavilion WS] Error:', err)
+      console.error('[PavilionMfe WS] Error:', err)
     }
   })
 }

@@ -12,11 +12,11 @@ export async function devCommand(options: {
   const wsProcess = fork(wsServerPath, [], { stdio: 'pipe' })
 
   wsProcess.on('spawn', () => {
-    console.log('[Pavilion] Dev discovery service started')
+    console.log('[PavilionMfe] Dev discovery service started')
   })
 
-  console.log('[Pavilion] Starting development servers...')
-  console.log('[Pavilion] Run `pavilion dev` from your project root directory')
+  console.log('[PavilionMfe] Starting development servers...')
+  console.log('[PavilionMfe] Run `pavilion-mfe dev` from your project root directory')
 
   process.on('SIGINT', () => {
     wsProcess.kill()

@@ -1,5 +1,5 @@
 {
-  "name": "@pavilion/vite",
+  "name": "@pavilion-mfe/vite",
   "version": "0.1.0",
   "type": "module",
   "exports": {

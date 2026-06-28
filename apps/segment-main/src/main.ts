@@ -2,13 +2,13 @@ import { createApp } from 'vue'
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
-import { createRouter as createPavilionRouter, configureLog, createPathMatcher } from '@pavilion/router'
+import { createRouter as createPavilionMfeRouter, configureLog, createPathMatcher } from '@pavilion-mfe/router'
 import { loadRemote } from '@module-federation/runtime'
 import mfeConfig from '../mfe.json'
 import router from './router'
 import App from './App.vue'
 
-// ─── Pavilion log configuration ───
+// ─── PavilionMfe log configuration ───
 // Toggle per-module: router | sandbox | preload | bridge
 // Set to false to silence that module's logs.
 configureLog({
@@ -21,19 +21,19 @@ configureLog({
   },
 })
 
-// ─── Pavilion config info ───
-const appCode = import.meta.env.VITE_PAVILION_APP_CODE
-const pavilionEnv = import.meta.env.VITE_PAVILION_ENV || 'develop'
+// ─── PavilionMfe config info ───
+const appCode = import.meta.env.VITE_PAVILION_MFE_APP_CODE
+const pavilionMfeEnv = import.meta.env.VITE_PAVILION_MFE_ENV || 'develop'
 const apiBase = import.meta.env.VITE_BASE_API_URL || ''
-const cdn = import.meta.env.VITE_PAVILION_CDN || ''
+const cdn = import.meta.env.VITE_PAVILION_MFE_CDN || ''
 
 const ST_PX = 'color:#42b883;font-weight:bold'
 const ST_KEY = 'color:#999'
 const ST_VAL = 'color:#00b4d8;font-weight:bold'
 console.log(
-  '%c[Pavilion 微前端]%c %s\n  %cenv%c %s  %capi%c %s  %ccdn%c %s',
+  '%c[PavilionMfe 微前端]%c %s\n  %cenv%c %s  %capi%c %s  %ccdn%c %s',
   ST_PX, '', appCode,
-  ST_KEY, ST_VAL, pavilionEnv,
+  ST_KEY, ST_VAL, pavilionMfeEnv,
   ST_KEY, ST_VAL, apiBase || '-',
   ST_KEY, ST_VAL, cdn || '(relative)',
 )
@@ -53,8 +53,8 @@ for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
 
 app.mount('#app')
 
-// 启动 Pavilion 微前端路由
-const pavilionRouter = createPavilionRouter({
+// 启动 PavilionMfe 微前端路由
+const pavilionMfeRouter = createPavilionMfeRouter({
   maxCache: 5,
   apps: mfeConfig.apps.map((seg) => ({
     name: seg.appCode,
@@ -63,7 +63,7 @@ const pavilionRouter = createPavilionRouter({
         const mod = await loadRemote(`${seg.appCode}/main`) as any
         return (mod as any).default ?? mod
       } catch (err) {
-        console.error(`[Pavilion] Failed to load ${seg.appCode}:`, err)
+        console.error(`[PavilionMfe] Failed to load ${seg.appCode}:`, err)
         return {
           mount: async (_ctx: any, el: HTMLElement) => {
             el.innerHTML = `<p style="color:#999;">${seg.name} 未加载</p>`
@@ -77,4 +77,4 @@ const pavilionRouter = createPavilionRouter({
   })),
 })
 
-pavilionRouter.start()
+pavilionMfeRouter.start()

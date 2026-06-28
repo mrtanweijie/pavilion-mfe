@@ -3,7 +3,7 @@
     <!-- Logo -->
     <div class="logo" @click="router.push('/')">
       <el-icon :size="24" class="logo-icon"><Files /></el-icon>
-      <span v-show="!isCollapse" class="logo-text">Pavilion</span>
+      <span v-show="!isCollapse" class="logo-text">PavilionMfe</span>
     </div>
 
     <!-- 菜单 -->
@@ -68,7 +68,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { navigateTo } from '@pavilion/router'
+import { navigateTo } from '@pavilion-mfe/router'
 import {
   HomeFilled,
   Grid,

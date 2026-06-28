@@ -1,5 +1,5 @@
 {
-  "name": "pavilion-monorepo",
+  "name": "pavilion-mfe-monorepo",
   "private": true,
   "scripts": {
     "dev": "pnpm --parallel -r dev",

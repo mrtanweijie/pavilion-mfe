@@ -25,7 +25,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
-import { navigateTo } from '@pavilion/router'
+import { navigateTo } from '@pavilion-mfe/router'
 
 const currentPath = ref(window.location.pathname)
 const update = () => {
@@ -37,7 +37,7 @@ onUnmounted(() => window.removeEventListener('popstate', update))
 const tableData = [
   { label: '当前路径', value: currentPath.value },
   { label: '框架', value: 'Vue 3 + TypeScript + Element Plus' },
-  { label: '微前端', value: 'Pavilion (Module Federation)' },
+  { label: '微前端', value: 'PavilionMfe (Module Federation)' },
   { label: '构建工具', value: 'Vite 5' },
 ]
 </script>
