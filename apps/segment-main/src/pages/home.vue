@@ -66,7 +66,7 @@ const menuList = menus
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  height: 130px;
+  height: 140px;
 }
 .app-card-header {
   display: flex;
@@ -78,7 +78,7 @@ const menuList = menus
   color: var(--text-primary);
 }
 .app-card-body {
-  padding: 30px 20px;
+  padding: 20px;
   display: flex;
   flex-wrap: wrap;
   gap: 8px;

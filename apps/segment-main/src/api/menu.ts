@@ -114,6 +114,22 @@ async function doFetchMenus(): Promise<MenuItem[]> {
         { menuCode: 'system/env', menuName: '环境信息', menuTp: '1', parentCode: 'system', orderNo: 2, status: '1', menuUrl: '/env', menuIcon: 'Position' },
       ],
     },
+    // ─── 错误页面 ───
+    {
+      menuCode: 'error-pages',
+      menuName: '错误页面',
+      menuTp: '0',
+      parentCode: '',
+      orderNo: 100,
+      status: '1',
+      menuUrl: '',
+      menuIcon: 'Compass',
+      childrenMenuInfoList: [
+        { menuCode: 'error-pages/403', menuName: '403 权限不足', menuTp: '1', parentCode: 'error-pages', orderNo: 1, status: '1', menuUrl: '/403', menuIcon: 'Lock' },
+        { menuCode: 'error-pages/404', menuName: '404 页面不存在', menuTp: '1', parentCode: 'error-pages', orderNo: 2, status: '1', menuUrl: '/404', menuIcon: 'Guide' },
+        { menuCode: 'error-pages/500', menuName: '500 服务器错误', menuTp: '1', parentCode: 'error-pages', orderNo: 3, status: '1', menuUrl: '/500', menuIcon: 'Drizzling' },
+      ],
+    },
   ]
 
   menus.value = data

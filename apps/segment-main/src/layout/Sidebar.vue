@@ -113,7 +113,10 @@ function handleSelect(index: string) {
     }
   }
 
-  openTab({ path: index, title })
+  // 错误页面不创建 Tab
+  if (!['/403', '/404', '/500'].includes(index)) {
+    openTab({ path: index, title })
+  }
 
   if (isMainAppRoute(index)) {
     router.push(index)
