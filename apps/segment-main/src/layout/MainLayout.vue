@@ -11,6 +11,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
+import { createPathMatcher } from '@pavilion/router'
 import Sidebar from './Sidebar.vue'
 import mfeConfig from '../../mfe.json'
 
@@ -19,9 +20,7 @@ const route = useRoute()
 /** Whether the current route belongs to a micro-frontend segment */
 const isSegmentRoute = computed(() =>
   mfeConfig.apps.some((seg: any) =>
-    seg.routes.some((r: string) =>
-      route.path.replace(/\/?$/, '/').startsWith(r.replace(/\/?$/, '/'))
-    )
+    createPathMatcher(seg.routes)(route.path)
   )
 )
 </script>

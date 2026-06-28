@@ -41,18 +41,19 @@ export default {
 }
 
 /** 独立运行时自启动 */
-const rootEl = document.getElementById('root')
-if (rootEl && !(rootEl as any)._reactRootContainer) {
-  
-  console.log('子应用独立运行 standalone', appCode)
+if (!window.__PAVILION_MFE_ENV__) {
+  const rootEl = document.getElementById('root')
+  if (rootEl) {
+    console.log('子应用独立运行 standalone', appCode)
 
-  rootEl.classList.add(`pavilion-${appCode}`)
+    rootEl.classList.add(`pavilion-${appCode}`)
 
-  const router = createStandaloneRouter()
-  const root = createRoot(rootEl)
-  root.render(
-    <React.StrictMode>
-      <App router={router} />
-    </React.StrictMode>
-  )
+    const router = createStandaloneRouter()
+    const root = createRoot(rootEl)
+    root.render(
+      <React.StrictMode>
+        <App router={router} />
+      </React.StrictMode>
+    )
+  }
 }

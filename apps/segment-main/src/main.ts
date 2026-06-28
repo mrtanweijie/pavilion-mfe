@@ -2,7 +2,7 @@ import { createApp } from 'vue'
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
-import { createRouter as createPavilionRouter, configureLog } from '@pavilion/router'
+import { createRouter as createPavilionRouter, configureLog, createPathMatcher } from '@pavilion/router'
 import { loadRemote } from '@module-federation/runtime'
 import mfeConfig from '../mfe.json'
 import router from './router'
@@ -71,10 +71,7 @@ const pavilionRouter = createPavilionRouter({
         }
       }
     },
-    activeWhen: (path: string) =>
-      seg.routes.some((route: string) =>
-        path.replace(/\/?$/, '/').startsWith(route.replace(/\/?$/, '/'))
-      ),
+    activeWhen: createPathMatcher(seg.routes),
     basename: seg.routes[0] ?? '',
     keepAlive: seg.keepAlive ?? false,
   })),

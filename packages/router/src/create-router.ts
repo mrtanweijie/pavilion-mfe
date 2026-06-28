@@ -16,7 +16,7 @@ export function createRouter(config?: RouterConfig) {
   const hooks: RouterHooks | undefined = config?.hooks
 
   // Track keep-alive preference and cache metadata per app
-  const keepAliveMap = new Map<string, { keepAlive: boolean; maxCache?: number; cachedAt: number }>()
+  const keepAliveMap = new Map<string, { keepAlive: boolean; cachedAt: number }>()
 
   /**
    * Dispatch a Pavilion routing event.
@@ -61,7 +61,6 @@ export function createRouter(config?: RouterConfig) {
     })
     keepAliveMap.set(app.name, {
       keepAlive: app.keepAlive ?? false,
-      maxCache: app.maxCache,
       cachedAt: 0,
     })
     pavilionLog('router', 'segment-register', { appCode: app.name, keepAlive: app.keepAlive ?? false, basename: app.basename ?? '' })
@@ -199,18 +198,8 @@ export function createRouter(config?: RouterConfig) {
     hooks?.beforeUnmount?.(makeHookCtx(app))
 
     if (useKeepAlive) {
-      // Check cache limit before caching
-      const perAppMax = meta?.maxCache
-      if (perAppMax !== undefined) {
-        // Per-app max: count cached instances of this same app
-        const thisAppCached = apps.filter((a) => a.name === app.name && a.status === 'CACHED').length
-        if (thisAppCached >= perAppMax) {
-          // Evict oldest instance of this app
-        }
-      } else {
-        // Global LRU eviction
-        evictLRU()
-      }
+      // Global LRU eviction before caching
+      evictLRU()
 
       // Keep-alive: hide container, retain framework instance + DOM + sandbox.
       // Do NOT deactivate sandbox — the popstate proxy will block events
@@ -378,6 +367,10 @@ export function createRouter(config?: RouterConfig) {
 
   function start(): void {
     pavilionLog('router', 'router-start', { segments: apps.length, maxCache })
+
+    // Mark the global environment so segment apps can detect Shell mode
+    // via isPavilionShell() without querying the DOM.
+    ;(globalThis as Record<string, unknown>).__PAVILION_MFE_ENV__ = true
 
     // Set up route isolation: segment popstate listeners only fire when
     // the segment's route is active. This prevents inactive segments from

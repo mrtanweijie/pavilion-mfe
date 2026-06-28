@@ -40,13 +40,15 @@ export default {
 }
 
 /** 独立运行时自启动 */
-const mountEl = document.getElementById('app')
-if (mountEl && !(mountEl as any).__vue_app__) {
-  console.log('[Pavilion 微前端] standalone mount', appCode)
-  mountEl.classList.add(`pavilion-${appCode}`)
-  const app = createApp(App)
-  app.use(ElementPlus)
-  const router = createDemoRouter()
-  app.use(router)
-  app.mount(mountEl)
+if (!window.__PAVILION_MFE_ENV__) {
+  const mountEl = document.getElementById('app')
+  if (mountEl) {
+    console.log('[Pavilion 微前端] standalone mount', appCode)
+    mountEl.classList.add(`pavilion-${appCode}`)
+    const app = createApp(App)
+    app.use(ElementPlus)
+    const router = createDemoRouter()
+    app.use(router)
+    app.mount(mountEl)
+  }
 }

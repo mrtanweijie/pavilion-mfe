@@ -63,8 +63,17 @@ export function wsDiscoveryPlugin(options: {
           // WS discovery not available — dev standalone
         }
       })
+    
+      // Clean up on dev server close.
+      // closeBundle is a build-only hook — it never fires in dev mode,
+      // so we listen on httpServer 'close' instead.
+      server.httpServer?.on('close', () => {
+        broadcastPort('remove')
+        wsClient?.close()
+      })
     },
-
+    
+    // Keep closeBundle for build-mode cleanup (no-op in dev)
     closeBundle() {
       broadcastPort('remove')
       setTimeout(() => wsClient?.close(), 200)

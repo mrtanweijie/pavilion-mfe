@@ -12,7 +12,6 @@ export {
   createRouter,
   matchAppByPath,
   navigateTo,
-  setupRoutingIsolation,
 } from '@pavilion/router'
 
 export type {

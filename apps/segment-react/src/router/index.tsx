@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useLayoutEffect } from 'react'
 import { createBrowserRouter } from 'react-router-dom'
 import type { Router } from '@remix-run/router'
 
@@ -60,6 +60,28 @@ function mapPathConfigToRoute(cfg: Record<string, unknown>): any[] {
   })
 }
 
+/**
+ * In Shell mode: redirect to the Shell's /404 page via replaceState +
+ * synthetic popstate (triggers Pavilion router to unmount this segment
+ * and Shell's router to render the 404 page).
+ * Uses useLayoutEffect to fire before browser paint, preventing the
+ * user from briefly seeing the segment's App.tsx heading.
+ * In standalone mode: render the segment's own 404 component.
+ */
+function RedirectToShell404({ fallback }: { fallback?: React.ReactNode }) {
+  const isShell = !!window.__PAVILION_MFE_ENV__
+
+  useLayoutEffect(() => {
+    if (isShell) {
+      window.history.replaceState(null, '', '/404')
+      window.dispatchEvent(new PopStateEvent('popstate', { state: null }))
+    }
+  }, [isShell])
+
+  if (isShell) return null
+  return <>{fallback}</>
+}
+
 export function generateRouteConfig() {
   const { '404': notFound, ...pathConfig } = generatePathConfig() as Record<string, unknown>
 
@@ -70,7 +92,7 @@ export function generateRouteConfig() {
     },
     {
       path: '*',
-      element: wrapSuspense(notFound as GlobImporter),
+      element: <RedirectToShell404 fallback={wrapSuspense(notFound as GlobImporter)} />,
     },
   ]
 }

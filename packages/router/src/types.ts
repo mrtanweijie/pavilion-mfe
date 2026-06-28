@@ -8,8 +8,6 @@ export interface SegmentApp {
   basename?: string
   /** Keep this segment's framework instance alive when unmounted (display:none only) */
   keepAlive?: boolean
-  /** Max cached pages for this segment (overrides global maxCache). Default: unlimited */
-  maxCache?: number
 }
 
 export interface SegmentLifecycle {

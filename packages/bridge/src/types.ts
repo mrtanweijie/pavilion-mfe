@@ -1,15 +1,18 @@
-/** Built-in MFE events (extracted from chagee's event protocol) */
+/** Built-in Pavilion routing events dispatched by createRouter.
+ *  These match the event names used by window.dispatchEvent in create-router.ts. */
 export enum MFEEvent {
-  /** Fired before a child app route changes (from beforeEach) */
-  ROUTE_BEFORE_CHANGE = 'pavilion:route-before-change',
-  /** Fired after a child app route changes (from afterEach) */
-  ROUTE_AFTER_CHANGE = 'pavilion:route-after-change',
+  /** Fired before shell routing (pushState/replaceState/popstate/init) */
+  BEFORE_ROUTING = 'pavilion:before-routing',
+  /** Fired after shell routing completes */
+  AFTER_ROUTING = 'pavilion:after-routing',
   /** Fired when switching from one segment to another */
   SEGMENT_SWITCH = 'pavilion:segment-switch',
-  /** Fired before shell routing event (pushState/replaceState) */
-  ROUTING_BEFORE = 'pavilion:routing-before',
-  /** Fired after shell routing event */
-  ROUTING_AFTER = 'pavilion:routing-after',
+  /** Fired before a segment is cached (keep-alive) */
+  BEFORE_CACHE = 'pavilion:before-cache',
+  /** Fired after a cached segment is restored */
+  AFTER_RESTORE = 'pavilion:after-restore',
+  /** Fired when a segment encounters an error */
+  SEGMENT_ERROR = 'pavilion:segment-error',
 }
 
 export interface RouteChangeDetail {

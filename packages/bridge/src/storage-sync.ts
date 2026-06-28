@@ -95,7 +95,16 @@ export class StorageSync {
   private start(): void {
     window.addEventListener('storage', (event) => {
       if (event.key) {
-        this.publish(event.key, event.newValue)
+        // event.newValue is a raw JSON string — parse to match set() semantics
+        let value: unknown = null
+        if (event.newValue) {
+          try {
+            value = JSON.parse(event.newValue)
+          } catch {
+            value = event.newValue
+          }
+        }
+        this.publish(event.key, value)
       }
     })
   }

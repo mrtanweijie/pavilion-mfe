@@ -118,15 +118,48 @@ setRouteMatcher((appCode, path) => {
 })
 ```
 
+### 环境检测
+
+Shell 路由器 `start()` 时注入全局变量 `window.__PAVILION_MFE_ENV__ = true`，段应用可通过该变量判断是否运行在微前端环境中：
+
+```typescript
+// 段应用 main.ts / main.tsx
+
+/** 独立运行时自启动 */
+if (!window.__PAVILION_MFE_ENV__) {
+  // standalone 模式：挂载到本地 #root 元素
+  const el = document.getElementById('root')
+  // ...
+}
+```
+
+类型声明通过 `src/globals.d.ts` 提供（`export {}` + `declare global` 模块化方式）：
+
+```typescript
+// src/globals.d.ts
+export {}
+
+declare global {
+  interface Window {
+    __PAVILION_MFE_ENV__?: boolean
+  }
+}
+```
+
+段应用**零运行时依赖**，无需引入 `@pavilion/*` 包即可检测环境。
+
 ### 路由事件系统
 
 路由器在导航各阶段分发 `CustomEvent`，开发者可监听用于埋点、加载状态等：
 
 | 事件 | 触发时机 | detail |
 |------|---------|--------|
-| `pavilion:before-routing` | 路由开始切换前 | `{ url, trigger }` |
-| `pavilion:after-routing` | 路由切换完成 | `{ url, trigger }` |
+| `pavilion:before-routing` | 路由开始切换前 | `{ url, trigger, path, appCode }` |
+| `pavilion:after-routing` | 路由切换完成 | `{ url, trigger, path, appCode }` |
 | `pavilion:segment-switch` | 活跃段发生变化 | `{ from: string[], to: string[] }` |
+| `pavilion:before-cache` | 段进入 Keep-Alive 缓存前 | `{ appCode }` |
+| `pavilion:after-restore` | 段从缓存恢复显示 | `{ appCode }` |
+| `pavilion:segment-error` | 段加载/挂载失败 | `{ appCode, phase, error }` |
 
 ```typescript
 window.addEventListener('pavilion:segment-switch', (e) => {
@@ -163,7 +196,7 @@ const pavilionRouter = createPavilionRouter({
 
 状态机增加 `CACHED` 状态：`MOUNTED → (unmount) → CACHED → (restore) → MOUNTED`
 
-沙箱在缓存时仍会 `deactivate()`（清理 timers/listeners），恢复时重新 `activate()`。
+沙箱在缓存时**不** `deactivate()`——保留 popstate 代理，非活跃段不会收到导航事件。恢复时仅需 `display:block` + 跳过重新 mount。全局 LRU 驱逐时才执行完整的 `deactivate()` + `unmount()`。
 
 ### 运行时预加载
 

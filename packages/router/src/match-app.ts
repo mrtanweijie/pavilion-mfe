@@ -9,6 +9,22 @@ export interface SegmentRouteConfig {
 }
 
 /**
+ * Create a path matcher function for a set of route prefixes.
+ * Uses trailing-slash normalization for consistent prefix matching.
+ *
+ * Usage:
+ *   const match = createPathMatcher(['/demo', '/demo/list'])
+ *   match('/demo/list')  // true
+ *   match('/react')      // false
+ */
+export function createPathMatcher(routes: string[]): (path: string) => boolean {
+  return (path: string) =>
+    routes.some((route) =>
+      path.replace(/\/?$/, '/').startsWith(route.replace(/\/?$/, '/'))
+    )
+}
+
+/**
  * Match a URL path to a segment by prefix.
  * Both sides normalize trailing slashes for consistent matching.
  */
@@ -24,10 +40,7 @@ export function matchAppByPath(
   }
 
   for (const seg of segments) {
-    const matched = seg.routes.some((route) =>
-      path.replace(/\/?$/, '/').startsWith(route.replace(/\/?$/, '/'))
-    )
-    if (matched) return seg
+    if (createPathMatcher(seg.routes)(path)) return seg
   }
   return null
 }

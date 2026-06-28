@@ -21,14 +21,37 @@ const routes = [
     component: () => import('../pages/form.vue'),
   },
   {
+    // catch-all：渲染空内容，实际 404 重定向由 beforeEach 守卫处理
     path: '/demo/:pathMatch(.*)*',
-    redirect: '/demo/list',
+    component: { render: () => null },
   },
 ]
 
 export function createDemoRouter(history?: RouterHistory) {
-  return createRouter({
+  const router = createRouter({
     history: history ?? createWebHistory(),
     routes,
   })
+
+  // 404 重定向守卫：在组件加载/渲染之前同步执行，
+  // 确保 URL 在 Pavilion reroute 运行前就已变为 /404，
+  // 避免段被 restore 后用户短暂看到 App.vue 内容的竞态问题。
+  router.beforeEach((to) => {
+    if (
+      to.matched.length > 0 &&
+      to.matched[0].path === '/demo/:pathMatch(.*)*'
+    ) {
+      const isShell = !!window.__PAVILION_MFE_ENV__
+      if (isShell) {
+        // Shell 模式：重定向到基座 /404 页面
+        window.history.replaceState(null, '', '/404')
+        window.dispatchEvent(new PopStateEvent('popstate', { state: null }))
+      } else {
+        // 独立模式：重定向到列表页
+        return '/demo/list'
+      }
+    }
+  })
+
+  return router
 }
