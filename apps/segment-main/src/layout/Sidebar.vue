@@ -6,7 +6,7 @@
       <span class="logo-text">PavilionMfe</span>
     </div>
 
-    <!-- 菜单 -->
+    <!-- 菜单（全部从接口数据动态渲染） -->
     <el-menu
       :default-active="currentPath"
       :collapse="isCollapse"
@@ -16,43 +16,28 @@
       active-text-color="#fff"
       @select="handleSelect"
     >
-      <!-- 首页 -->
-      <el-menu-item index="/">
-        <el-icon><HomeFilled /></el-icon>
-        <template #title>首页</template>
-      </el-menu-item>
-
-      <!-- 微前端子应用（从后端菜单接口动态获取） -->
-      <el-sub-menu v-for="app in menuList" :key="app.menuCode" :index="app.menuCode">
-        <template #title>
-          <el-icon v-if="app.menuIcon"><component :is="app.menuIcon" /></el-icon>
-          <span>{{ app.menuName }}</span>
-        </template>
-        <el-menu-item
-          v-for="child in app.childrenMenuInfoList"
-          :key="child.menuUrl"
-          :index="child.menuUrl"
-        >
-          <el-icon v-if="child.menuIcon"><component :is="child.menuIcon" /></el-icon>
-          <span>{{ child.menuName }}</span>
+      <template v-for="menu in menuList" :key="menu.menuCode">
+        <!-- 有子菜单 -->
+        <el-sub-menu v-if="menu.childrenMenuInfoList?.length" :index="menu.menuCode">
+          <template #title>
+            <el-icon v-if="menu.menuIcon"><component :is="menu.menuIcon" /></el-icon>
+            <span>{{ menu.menuName }}</span>
+          </template>
+          <el-menu-item
+            v-for="child in menu.childrenMenuInfoList"
+            :key="child.menuUrl"
+            :index="child.menuUrl"
+          >
+            <el-icon v-if="child.menuIcon"><component :is="child.menuIcon" /></el-icon>
+            <span>{{ child.menuName }}</span>
+          </el-menu-item>
+        </el-sub-menu>
+        <!-- 无子菜单，直接可点击 -->
+        <el-menu-item v-else :index="menu.menuUrl">
+          <el-icon v-if="menu.menuIcon"><component :is="menu.menuIcon" /></el-icon>
+          <template #title>{{ menu.menuName }}</template>
         </el-menu-item>
-      </el-sub-menu>
-
-      <!-- 系统工具 -->
-      <el-sub-menu index="system">
-        <template #title>
-          <el-icon><Setting /></el-icon>
-          <span>系统工具</span>
-        </template>
-        <el-menu-item index="/test">
-          <el-icon><Monitor /></el-icon>
-          <span>测试页</span>
-        </el-menu-item>
-        <el-menu-item index="/env">
-          <el-icon><InfoFilled /></el-icon>
-          <span>环境信息</span>
-        </el-menu-item>
-      </el-sub-menu>
+      </template>
     </el-menu>
 
     <!-- 底部：用户信息 + 折叠按钮 -->
@@ -106,8 +91,11 @@ onUnmounted(() => {
   window.removeEventListener('popstate', syncPath)
 })
 
-/** 主应用自有路由列表 */
-const mainAppPaths = ['/', '/test', '/env', '/403', '/404']
+/** 判断是否为自有路由（非子应用） */
+function isMainAppRoute(path: string): boolean {
+  const resolved = router.resolve(path)
+  return resolved.name !== 'MFPage'
+}
 
 /** el-menu 选中回调 */
 function handleSelect(index: string) {
@@ -127,7 +115,7 @@ function handleSelect(index: string) {
 
   openTab({ path: index, title })
 
-  if (mainAppPaths.includes(index)) {
+  if (isMainAppRoute(index)) {
     router.push(index)
   } else {
     navigateTo(index)
