@@ -12,25 +12,35 @@
       "types": "./dist/vue-plugin.d.ts"
     },
     "./react": {
-      "import": "./src/react-provider.ts",
+      "import": "./src/react-provider.tsx",
       "types": "./dist/react-provider.d.ts"
     }
   },
-  "files": ["dist", "src"],
+  "files": [
+    "dist",
+    "src"
+  ],
   "scripts": {
     "dev": "tsc --watch",
     "build": "tsc",
     "typecheck": "tsc --noEmit"
   },
   "peerDependencies": {
+    "react": ">=17.0.0",
     "vue": "^3.4.0"
   },
   "peerDependenciesMeta": {
     "vue": {
       "optional": true
+    },
+    "react": {
+      "optional": true
     }
   },
   "publishConfig": {
     "access": "public"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.0"
   }
 }

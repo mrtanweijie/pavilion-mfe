@@ -3,7 +3,7 @@
 </template>
 
 <script setup lang="ts">
-import logoSvg from './pavilion-mfe-logo.svg'
+import logoSvg from '../assets/pavilion-mfe-logo.svg'
 </script>
 
 <style scoped>

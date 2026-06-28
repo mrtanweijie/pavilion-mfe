@@ -34,6 +34,12 @@ const routes = [
     component: () => import('../pages/404.vue'),
   },
   {
+    path: '/500',
+    name: 'ServerError',
+    meta: { title: '500' },
+    component: () => import('../pages/500.vue'),
+  },
+  {
     // catch-all：微前端子应用路由（/demo/*, /react/* 等）
     // 实际渲染由 #pavilion-mfe-container（在 MainLayout 中）处理，
     // 此路由仅用于让 Vue Router 匹配子应用路径，保持 route.path 正确更新。

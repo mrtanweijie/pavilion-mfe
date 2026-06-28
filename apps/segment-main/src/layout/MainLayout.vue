@@ -56,7 +56,7 @@ function syncRouteToTabs(fullUrl: string) {
   const path = url.pathname
   const search = url.search
 
-  if (path === '/403' || path === '/404') return
+  if (path === '/403' || path === '/404' || path === '/500') return
 
   const exists = tabs.value.find((t) => t.path === path)
   if (exists) {
@@ -138,6 +138,11 @@ onUnmounted(() => {
   --el-color-primary-light-9: rgba(99, 91, 255, 0.1);
   --el-color-primary-dark-2: #5147E0;
   --el-border-radius-base: 8px;
+}
+
+/* 按钮 */
+.el-button {
+  height: 40px;
 }
 
 /* 全局重置 */

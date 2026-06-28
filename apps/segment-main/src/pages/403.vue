@@ -1,18 +1,39 @@
 <template>
   <div class="error-page">
-    <el-result icon="warning" title="403" sub-title="权限不足">
-      <template #extra>
-        <el-button type="primary" @click="$router.push('/')">返回首页</el-button>
-      </template>
-    </el-result>
+    <img :src="forbiddenSvg" alt="403" class="error-img" />
+    <h2 class="error-title">权限不足</h2>
+    <p class="error-desc">您没有权限访问此页面</p>
+    <el-button type="primary" @click="$router.push('/')"><el-icon :size="16"><Back /></el-icon>返回首页</el-button>
   </div>
 </template>
+
+<script setup lang="ts">
+import forbiddenSvg from '../assets/403.svg'
+</script>
 
 <style scoped>
 .error-page {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   height: 100%;
+  gap: 16px;
+}
+.error-img {
+  width: 320px;
+  max-width: 60%;
+}
+.error-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+.error-desc {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin: 0;
 }
 </style>

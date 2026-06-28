@@ -1,15 +1,15 @@
 <template>
   <div class="error-page">
-    <img :src="notFoundSvg" alt="404" class="error-img" />
-    <h2 class="error-title">页面不存在</h2>
-    <p class="error-desc">请检查 URL 是否正确，或返回首页</p>
+    <img :src="serverErrorSvg" alt="500" class="error-img" />
+    <h2 class="error-title">服务器错误</h2>
+    <p class="error-desc">服务端出现问题，请稍后重试</p>
     <el-button type="primary" @click="router.push('/')"><el-icon :size="16"><Back /></el-icon>返回首页</el-button>
   </div>
 </template>
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
-import notFoundSvg from '../assets/404.svg'
+import serverErrorSvg from '../assets/500.svg'
 const router = useRouter()
 </script>
 

@@ -258,7 +258,9 @@ configureLog({
 
 ### 多标签页管理
 
-`@pavilion-mfe/tabs` 提供框架无关的状态管理核心 + Vue 插件，支持主应用多标签页导航：
+`@pavilion-mfe/tabs` 提供框架无关的状态管理核心 + Vue / React 插件，支持主应用多标签页导航：
+
+**Vue**
 
 ```typescript
 // main.ts
@@ -272,10 +274,26 @@ const { tabs, activeTabId, openTab, closeTab, closeOthers, closeAll } = useTabs(
 
 openTab({ path: '/demo/list', title: '列表页' })  // 打开/切换到标签
 closeOthers(tabId)  // 关闭其他标签
-closeAll()          // 关闭全部（自动返回首页）
+closeAll()          // 关闭全部
 ```
 
-标签状态通过 `sessionStorage` 持久化，刷新页面后自动恢复。
+**React**
+
+```tsx
+// App.tsx
+import { TabsProvider } from '@pavilion-mfe/tabs/react'
+
+<TabsProvider>
+  <App />
+</TabsProvider>
+
+// 任意组件
+import { useTabs } from '@pavilion-mfe/tabs/react'
+
+const { tabs, openTab, closeAll } = useTabs()
+```
+
+标签状态通过 `sessionStorage` 持久化，刷新页面后自动恢复。Vue 与 React 插件共享同一存储 key。
 
 ### 通信
 

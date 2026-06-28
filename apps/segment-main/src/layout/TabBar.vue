@@ -201,6 +201,7 @@ function handleClose(tabId: string) {
   text-align: center;
   font-size: 14px;
   color: var(--text-muted);
+  border-radius: 4px;
   opacity: 0;
   transition: opacity 0.1s, background-color 0.15s, color 0.15s;
 }
