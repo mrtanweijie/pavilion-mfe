@@ -6,30 +6,30 @@
       </template>
       <template #extra>
         <el-space>
-          <el-tag v-for="seg in apps" :key="seg.appCode" type="info" size="large">
-            {{ seg.name }}
+          <el-tag v-for="app in menuList" :key="app.menuCode" type="info" size="large">
+            {{ app.menuName }}
           </el-tag>
         </el-space>
       </template>
     </el-result>
 
     <el-row :gutter="16" style="margin-top: 24px">
-      <el-col v-for="seg in apps" :key="seg.appCode" :span="12">
+      <el-col v-for="app in menuList" :key="app.menuCode" :span="12" class="card-col">
         <el-card shadow="hover" class="seg-card">
           <template #header>
             <div class="card-header">
-              <el-icon :size="18"><Grid v-if="seg.appCode === 'demo-app'" /><Connection v-else /></el-icon>
-              <span>{{ seg.name }}</span>
+              <el-icon :size="18"><component :is="app.menuIcon" v-if="app.menuIcon" /></el-icon>
+              <span>{{ app.menuName }}</span>
             </div>
           </template>
           <el-tag
-            v-for="child in seg.children"
-            :key="child.route"
+            v-for="child in app.childrenMenuInfoList"
+            :key="child.menuUrl"
             size="small"
             style="margin-right: 8px; margin-bottom: 8px; cursor: pointer"
-            @click="navigateTo(child.route)"
+            @click="navigateTo(child.menuUrl)"
           >
-            {{ child.name }}
+            {{ child.menuName }}
           </el-tag>
         </el-card>
       </el-col>
@@ -38,17 +38,20 @@
 </template>
 
 <script setup lang="ts">
-import { Grid, Connection } from '@element-plus/icons-vue'
 import { navigateTo } from '@pavilion-mfe/router'
-import mfeConfig from '../../mfe.json'
+import { menus } from '../api/menu'
 
-const apps = mfeConfig.apps
+const menuList = menus
 </script>
 
 <style scoped>
 .welcome {
   max-width: 960px;
   margin: 0 auto;
+}
+
+.card-col {
+  margin-bottom: 16px;
 }
 
 .seg-card {

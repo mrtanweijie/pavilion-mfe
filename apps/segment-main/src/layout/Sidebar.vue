@@ -8,7 +8,7 @@
 
     <!-- 菜单 -->
     <el-menu
-      :default-active="route.path"
+      :default-active="currentPath"
       :collapse="isCollapse"
       :collapse-transition="false"
       background-color="#1a1a2e"
@@ -22,19 +22,19 @@
         <template #title>首页</template>
       </el-menu-item>
 
-      <!-- 微前端子应用（从 mfe.json 动态生成） -->
-      <el-sub-menu v-for="seg in apps" :key="seg.appCode" :index="seg.appCode">
+      <!-- 微前端子应用（从后端菜单接口动态获取） -->
+      <el-sub-menu v-for="app in menuList" :key="app.menuCode" :index="app.menuCode">
         <template #title>
-          <el-icon><component :is="segIcon(seg.appCode)" /></el-icon>
-          <span>{{ seg.name }}</span>
+          <el-icon v-if="app.menuIcon"><component :is="app.menuIcon" /></el-icon>
+          <span>{{ app.menuName }}</span>
         </template>
         <el-menu-item
-          v-for="child in seg.children"
-          :key="child.route"
-          :index="child.route"
+          v-for="child in app.childrenMenuInfoList"
+          :key="child.menuUrl"
+          :index="child.menuUrl"
         >
-          <el-icon><component :is="childIcon(child.route)" /></el-icon>
-          <span>{{ child.name }}</span>
+          <el-icon v-if="child.menuIcon"><component :is="child.menuIcon" /></el-icon>
+          <span>{{ child.menuName }}</span>
         </el-menu-item>
       </el-sub-menu>
 
@@ -66,30 +66,33 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { ref, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { navigateTo } from '@pavilion-mfe/router'
-import {
-  HomeFilled,
-  Grid,
-  Connection,
-  Setting,
-  Monitor,
-  InfoFilled,
-  Fold,
-  Expand,
-  List,
-  Document,
-  EditPen,
-  DataAnalysis,
-  Files,
-} from '@element-plus/icons-vue'
-import mfeConfig from '../../mfe.json'
+import { menus } from '../api/menu'
 
-const route = useRoute()
 const router = useRouter()
-const apps = mfeConfig.apps
+const menuList = menus
 const isCollapse = ref(false)
+
+/** 当前路径（响应式，监听子应用内部导航） */
+const currentPath = ref(window.location.pathname)
+
+function syncPath() {
+  currentPath.value = window.location.pathname
+}
+
+onMounted(() => {
+  // pavilion 路由事件：子应用通过 pushState 导航时触发
+  window.addEventListener('pavilion-mfe:after-routing', syncPath)
+  // popstate：浏览器前进/后退
+  window.addEventListener('popstate', syncPath)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('pavilion-mfe:after-routing', syncPath)
+  window.removeEventListener('popstate', syncPath)
+})
 
 /** 主应用自有路由列表 */
 const mainAppPaths = ['/', '/test', '/env', '/403', '/404']
@@ -103,23 +106,6 @@ function handleSelect(index: string) {
   }
 }
 
-/** 子应用图标映射 */
-function segIcon(appCode: string) {
-  const map: Record<string, any> = {
-    'demo-app': Grid,
-    'react-app': Connection,
-  }
-  return map[appCode] ?? Grid
-}
-
-/** 子菜单图标映射 */
-function childIcon(routePath: string) {
-  if (routePath.includes('/list')) return List
-  if (routePath.includes('/detail')) return Document
-  if (routePath.includes('/form')) return EditPen
-  if (routePath.includes('/dashboard')) return DataAnalysis
-  return List
-}
 </script>
 
 <style scoped>

@@ -5,6 +5,7 @@ import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import { createRouter as createPavilionMfeRouter, configureLog, createPathMatcher } from '@pavilion-mfe/router'
 import { loadRemote } from '@module-federation/runtime'
 import mfeConfig from '../mfe.json'
+import { fetchMenus } from './api/menu'
 import router from './router'
 import App from './App.vue'
 
@@ -53,7 +54,7 @@ for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
 
 app.mount('#app')
 
-// 启动 PavilionMfe 微前端路由
+// 启动 PavilionMfe 微前端路由（子应用配置来自 mfe.json）
 const pavilionMfeRouter = createPavilionMfeRouter({
   maxCache: 5,
   apps: mfeConfig.apps.map((app) => ({
@@ -78,3 +79,6 @@ const pavilionMfeRouter = createPavilionMfeRouter({
 })
 
 pavilionMfeRouter.start()
+
+// 获取菜单数据（仅用于侧边栏渲染，与微前端子应用配置解耦）
+fetchMenus()

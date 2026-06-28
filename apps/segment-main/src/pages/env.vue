@@ -23,16 +23,25 @@
     </el-row>
 
     <el-card shadow="hover" style="margin-top: 16px">
-      <template #header><span>已注册应用</span></template>
+      <template #header><span>已注册菜单</span></template>
       <el-table :data="tableData" stripe>
-        <el-table-column prop="appCode" label="应用标识" />
-        <el-table-column prop="name" label="应用名称" />
-        <el-table-column prop="routes" label="路由前缀">
+        <el-table-column prop="menuCode" label="菜单编码" />
+        <el-table-column prop="menuName" label="菜单名称" />
+        <el-table-column prop="menuUrl" label="路由地址" />
+        <el-table-column prop="menuTp" label="类型" width="80">
           <template #default="{ row }">
-            <el-tag v-for="r in row.routes" :key="r" size="small" style="margin-right: 4px">{{ r }}</el-tag>
+            <el-tag :type="row.menuTp === '0' ? 'primary' : 'info'" size="small">
+              {{ row.menuTp === '0' ? '目录' : '菜单' }}
+            </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="devPort" label="端口" width="80" />
+        <el-table-column prop="status" label="状态" width="80">
+          <template #default="{ row }">
+            <el-tag :type="row.status === '1' ? 'success' : 'danger'" size="small">
+              {{ row.status === '1' ? '启用' : '禁用' }}
+            </el-tag>
+          </template>
+        </el-table-column>
       </el-table>
     </el-card>
 
@@ -61,14 +70,14 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import mfeConfig from '../../mfe.json'
+import { menus } from '../api/menu'
 
 const currentPath = ref(window.location.pathname)
 const ua = navigator.userAgent
 const language = navigator.language
 const online = ref(navigator.onLine)
 
-const tableData = mfeConfig.apps
+const tableData = menus
 
 const pavilionMfeEnv = (import.meta.env.VITE_PAVILION_MFE_ENV || 'dev') as string
 const apiBase = (import.meta.env.VITE_BASE_API_URL || '') as string

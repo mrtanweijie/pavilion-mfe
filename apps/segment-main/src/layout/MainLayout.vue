@@ -12,14 +12,14 @@
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { createPathMatcher } from '@pavilion-mfe/router'
-import Sidebar from './Sidebar.vue'
 import mfeConfig from '../../mfe.json'
+import Sidebar from './Sidebar.vue'
 
 const route = useRoute()
 
 /** Whether the current route belongs to a micro-frontend sub-app */
 const isSubAppRoute = computed(() =>
-  mfeConfig.apps.some((app: any) =>
+  mfeConfig.apps.some((app) =>
     createPathMatcher(app.routes)(route.path)
   )
 )

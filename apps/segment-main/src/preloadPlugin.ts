@@ -10,6 +10,15 @@
 import mfeConfig from '../mfe.json'
 import { loadRemote, preloadRemote } from '@module-federation/runtime'
 
+interface MfeApp {
+  appCode: string
+  name: string
+  cdn?: string
+  routes: string[]
+  devPort?: number
+  keepAlive?: boolean
+}
+
 // ─── Inline logger (reads same global config as @pavilion-mfe/sandbox) ───
 // Avoids importing @pavilion-mfe/* packages at MF runtime init time.
 const ST_PX = 'color:#42b883;font-weight:bold'
@@ -32,20 +41,11 @@ function preloadLog(event: string, detail: Record<string, unknown> = {}): void {
   }
 }
 
-interface MfeApp {
-  appCode: string
-  name: string
-  routes: string[]
-  cdn?: string
-}
-
-const apps: MfeApp[] = mfeConfig.apps
-
 /**
  * Match a sub-app by URL path.
  * Uses the same trailing-slash normalization as createRouter.
  */
-function matchAppByPath(path: string): MfeApp | null {
+function matchAppByPath(apps: MfeApp[], path: string): MfeApp | null {
   for (const app of apps) {
     if (
       app.routes.some((route) =>
@@ -63,8 +63,8 @@ function matchAppByPath(path: string): MfeApp | null {
  * - Current sub-app: loadRemote immediately (user is waiting)
  * - Other sub-apps: preloadRemote after 1s delay (idle prefetch)
  */
-function preload(): void {
-  const currentApp = matchAppByPath(location.pathname)
+function preload(apps: MfeApp[]): void {
+  const currentApp = matchAppByPath(apps, location.pathname)
 
   const otherApps = apps.filter(
     (app) => app.appCode !== currentApp?.appCode
@@ -101,17 +101,15 @@ function preload(): void {
 }
 
 export default function () {
-  // Kick off preloading after MF runtime initializes
-  Promise.resolve().then(() => preload())
-
   return {
     name: 'pavilion-mfe-preload',
 
     /**
      * Register all sub-apps as MF remotes at runtime.
-     * This replaces static `pavilionMfeRemotes` / `remotes` in vite.config.ts.
+     * Sub-app config comes from mfe.json (build-time).
      */
     beforeInit(args: any) {
+      const apps = mfeConfig.apps as MfeApp[]
       const globalCdn = (import.meta.env.VITE_PAVILION_MFE_CDN || '') as string
       args.options.remotes.push(
         ...apps.map((app) => {
@@ -128,6 +126,8 @@ export default function () {
         remotes: apps.length,
         apps: apps.map(a => a.appCode).join(', '),
       })
+      // Kick off preloading after MF runtime initializes
+      Promise.resolve().then(() => preload(apps))
       return args
     },
   }

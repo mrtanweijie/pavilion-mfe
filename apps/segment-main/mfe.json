@@ -4,28 +4,16 @@
       "appCode": "demo-app",
       "name": "Demo (Vue)",
       "cdn": "",
-      "routes": ["/demo"],
+      "routes": ["/demo", "/vue-sub"],
       "devPort": 6020,
-      "keepAlive": true,
-      "children": [
-        { "name": "列表页", "route": "/demo/list" },
-        { "name": "详情页", "route": "/demo/detail" },
-        { "name": "表单页", "route": "/demo/form" },
-        { "name": "不存在", "route": "/demo/test" }
-      ]
+      "keepAlive": true
     },
     {
       "appCode": "react-app",
       "name": "Demo (React)",
       "cdn": "",
       "routes": ["/react"],
-      "devPort": 6030,
-      "children": [
-        { "name": "列表页", "route": "/react/list" },
-        { "name": "详情页", "route": "/react/detail" },
-        { "name": "仪表盘", "route": "/react/dashboard" },
-        { "name": "不存在", "route": "/react/test" }
-      ]
+      "devPort": 6030
     }
   ]
 }
