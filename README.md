@@ -52,12 +52,12 @@ bridge (零依赖)    sandbox (零依赖, 含 logger)    tabs (零依赖)
 |------|------|------|
 | `@pavilion-mfe/bridge` | 主应用-子应用事件通信桥（EventBus + StorageSync） | 零依赖 |
 | `@pavilion-mfe/sandbox` | JS 沙箱隔离（栈式副作用追踪 + 路由隔离 + 日志模块） | 零依赖 |
-| `@pavilion-mfe/tabs` | 多标签页状态管理 | 零依赖 |
-| `@pavilion-mfe/router` | 微前端生命周期路由调度器（路由事件 + popstate 隔离） | `@pavilion-mfe/sandbox` |
+| `@pavilion-mfe/tabs` | 多标签页状态管理（Vue 插件 + sessionStorage 持久化） | 零依赖 |
+| `@pavilion-mfe/router` | 微前端生命周期路由调度器（路由事件 + popstate 隔离） | `@pavilion-mfe/sandbox` `@pavilion-mfe/tabs` |
 | `@pavilion-mfe/runtime` | 共享运行时内核，作为 MF Remote 确保单例 | `@pavilion-mfe/router` `@pavilion-mfe/bridge` `@pavilion-mfe/sandbox` |
 | `@pavilion-mfe/vite` | Vite 插件，封装 Module Federation + CSS 作用域 | `@module-federation/vite` |
-| `@pavilion-mfe/cli` | 命令行工具（dev / build） | |
-| `create-pavilion-mfe` | 项目脚手架 | |
+| `@pavilion-mfe/cli` | 命令行工具（`pavilion-mfe dev` / `pavilion-mfe build`） | |
+| `create-pavilion-mfe` | 项目脚手架（`npm create pavilion-mfe`） | |
 
 ## 核心概念
 
@@ -256,6 +256,27 @@ configureLog({
 <script>window.__PAVILION_MFE_LOG__ = { modules: { sandbox: false } }</script>
 ```
 
+### 多标签页管理
+
+`@pavilion-mfe/tabs` 提供框架无关的状态管理核心 + Vue 插件，支持主应用多标签页导航：
+
+```typescript
+// main.ts
+import { tabsPlugin } from '@pavilion-mfe/tabs/vue'
+app.use(tabsPlugin)
+
+// 任意组件
+import { useTabs } from '@pavilion-mfe/tabs/vue'
+
+const { tabs, activeTabId, openTab, closeTab, closeOthers, closeAll } = useTabs()
+
+openTab({ path: '/demo/list', title: '列表页' })  // 打开/切换到标签
+closeOthers(tabId)  // 关闭其他标签
+closeAll()          // 关闭全部（自动返回首页）
+```
+
+标签状态通过 `sessionStorage` 持久化，刷新页面后自动恢复。
+
 ### 通信
 
 `EventBus` 提供按 `appCode` 定向投递的 pub/sub 事件总线。`StorageSync` 提供 LocalStorage 响应式订阅。`@pavilion-mfe/runtime` 作为 MF Shared Remote，确保所有应用共享同一个 EventBus / StorageSync 实例。
@@ -266,23 +287,27 @@ configureLog({
 
 ```json
 {
-  "cdn": "https://cdn.example.com",
   "apps": [
     {
       "appCode": "demo-app",
       "name": "Demo (Vue)",
-      "routes": ["/demo"],
+      "cdn": "",
+      "routes": ["/demo", "/vue-sub"],
       "devPort": 6020,
-      "children": [
-        { "name": "列表页", "route": "/demo/list" },
-        { "name": "详情页", "route": "/demo/detail" }
-      ]
+      "keepAlive": true
+    },
+    {
+      "appCode": "react-app",
+      "name": "Demo (React)",
+      "cdn": "",
+      "routes": ["/react"],
+      "devPort": 6030
     }
   ]
 }
 ```
 
-既是构建配置源，也是运行时路由注册源——单一事实来源。
+路由注册 + 构建配置的单一事实来源。菜单数据由后端接口提供，与子应用配置解耦。
 
 ## 构建优化
 
@@ -333,6 +358,19 @@ pnpm dev
 ```
 
 主应用运行在 `http://localhost:6010`，Vue 子应用在 `6020`，React 子应用在 `6030`。
+
+### 使用 CLI
+
+```bash
+# 一键启动（自动构建依赖 + 并行 dev）
+pnpm pavilion-mfe dev
+
+# 生产构建
+pnpm pavilion-mfe build
+
+# 创建新项目
+npm create pavilion-mfe
+```
 
 ## 开发
 
