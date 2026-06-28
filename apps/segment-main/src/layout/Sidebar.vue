@@ -111,13 +111,18 @@ const mainAppPaths = ['/', '/test', '/env', '/403', '/404']
 
 /** el-menu 选中回调 */
 function handleSelect(index: string) {
-  // 查找菜单标题
+  // 查找菜单标题：路由 meta → 后端菜单 → 降级路径
   let title = index
-  for (const menu of menuList.value) {
-    for (const child of menu.childrenMenuInfoList ?? []) {
-      if (child.menuUrl === index) { title = child.menuName; break }
+  const metaTitle = router.resolve(index).meta?.title as string | undefined
+  if (metaTitle) {
+    title = metaTitle
+  } else {
+    for (const menu of menuList.value) {
+      for (const child of menu.childrenMenuInfoList ?? []) {
+        if (child.menuUrl === index) { title = child.menuName; break }
+      }
+      if (menu.menuUrl === index) { title = menu.menuName; break }
     }
-    if (menu.menuUrl === index) { title = menu.menuName; break }
   }
 
   openTab({ path: index, title })

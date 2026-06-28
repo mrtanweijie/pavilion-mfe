@@ -6,26 +6,31 @@ const routes = [
   {
     path: '/',
     name: 'Home',
+    meta: { title: '首页' },
     component: () => import('../pages/home.vue'),
   },
   {
     path: '/test',
     name: 'Test',
+    meta: { title: '测试页' },
     component: () => import('../pages/test.vue'),
   },
   {
     path: '/env',
     name: 'Env',
+    meta: { title: '环境信息' },
     component: () => import('../pages/env.vue'),
   },
   {
     path: '/403',
     name: 'Forbidden',
+    meta: { title: '403' },
     component: () => import('../pages/403.vue'),
   },
   {
     path: '/404',
     name: 'NotFound',
+    meta: { title: '404' },
     component: () => import('../pages/404.vue'),
   },
   {

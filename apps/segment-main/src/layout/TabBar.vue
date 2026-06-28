@@ -34,7 +34,7 @@
         @click.stop
       >
         <div class="context-item" @click="closeOthers(contextMenu.tabId); contextMenu.visible = false">关闭其他</div>
-        <div class="context-item" @click="closeAll(); contextMenu.visible = false">关闭全部</div>
+        <div class="context-item" @click="closeAll(); contextMenu.visible = false; router.push('/')">关闭全部</div>
       </div>
       <div
         v-if="contextMenu.visible"

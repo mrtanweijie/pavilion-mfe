@@ -13,7 +13,7 @@
 
 <script setup lang="ts">
 import { computed, watch, onMounted, onUnmounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useTabs } from '@pavilion-mfe/tabs/vue'
 import { createPathMatcher } from '@pavilion-mfe/router'
 import { menus } from '../api/menu'
@@ -22,6 +22,7 @@ import Sidebar from './Sidebar.vue'
 import TabBar from './TabBar.vue'
 
 const route = useRoute()
+const router = useRouter()
 const { tabs, openTab } = useTabs()
 
 /** 当前路由是否属于微前端子应用 */
@@ -34,6 +35,12 @@ const isSubAppRoute = computed(() =>
 // ─── 路由 → Tab 单向同步 ───
 
 function findMenuTitle(path: string): string {
+  // 先从路由 meta 获取标题
+  const resolved = router.resolve(path)
+  const metaTitle = resolved.meta?.title as string | undefined
+  if (metaTitle) return metaTitle
+
+  // 再从后端菜单接口查找
   for (const menu of menus.value) {
     for (const child of menu.childrenMenuInfoList ?? []) {
       if (child.menuUrl === path) return child.menuName
@@ -146,12 +153,24 @@ html, body, #app { margin: 0; padding: 0; height: 100%; }
   flex: 1;
 }
 .el-menu-item {
-  border-left: 3px solid transparent !important;
+  position: relative;
+}
+.el-menu-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background-color: transparent;
+  transition: background-color 0.2s;
 }
 .el-menu-item.is-active {
   background-color: rgba(99, 91, 255, 0.15) !important;
   color: #fff !important;
-  border-left-color: #635BFF !important;
+}
+.el-menu-item.is-active::before {
+  background-color: #635BFF;
 }
 .el-sub-menu .el-menu {
   background-color: rgba(0, 0, 0, 0.15) !important;
