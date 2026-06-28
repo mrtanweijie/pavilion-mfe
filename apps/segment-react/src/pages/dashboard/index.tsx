@@ -4,12 +4,11 @@ import {
   ArrowRightOutlined,
   CheckCircleOutlined,
   SyncOutlined,
-  ClockCircleOutlined,
   CloseCircleOutlined,
 } from '@ant-design/icons'
 
 const statsCards = [
-  { label: '总任务数', value: 128, color: '#1890ff', icon: <ArrowRightOutlined /> },
+  { label: '总任务数', value: 128, color: '#635BFF', icon: <ArrowRightOutlined /> },
   { label: '进行中', value: 37, color: '#fa8c16', icon: <SyncOutlined spin /> },
   { label: '已完成', value: 82, color: '#52c41a', icon: <CheckCircleOutlined /> },
   { label: '异常', value: 9, color: '#f5222d', icon: <CloseCircleOutlined /> },
@@ -24,16 +23,18 @@ const activities = [
 
 const techStack = ['React 18', 'TypeScript', 'Module Federation', 'Vite 5', 'React Router 6', 'Ant Design 5']
 
+const cardStyle = { borderRadius: 12, border: '1px solid #E2E8F0' }
+
 export default function DashboardPage() {
   const navigate = useNavigate()
 
   return (
-    <div>
+    <div style={{ padding: '28px 32px' }}>
       {/* 统计卡片 */}
       <Row gutter={[16, 16]}>
         {statsCards.map((card) => (
           <Col xs={12} sm={6} key={card.label}>
-            <Card hoverable variant="borderless" style={{ borderTop: `3px solid ${card.color}` }}>
+            <Card style={cardStyle}>
               <Statistic
                 title={card.label}
                 value={card.value}
@@ -47,7 +48,7 @@ export default function DashboardPage() {
 
       {/* 快捷入口 */}
       <Space style={{ marginTop: 16 }}>
-        <Button type="primary" icon={<ArrowRightOutlined />} onClick={() => navigate('/list')}>
+        <Button type='primary' icon={<ArrowRightOutlined />} onClick={() => navigate('/list')}>
           列表页
         </Button>
         <Button icon={<ArrowRightOutlined />} onClick={() => navigate('/detail')}>
@@ -58,7 +59,7 @@ export default function DashboardPage() {
       {/* 活动 + 技术栈 */}
       <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
         <Col xs={24} md={16}>
-          <Card title="近期活动" variant="borderless">
+          <Card title='近期活动' style={cardStyle}>
             <Timeline
               items={activities.map((item) => ({
                 children: (
@@ -72,10 +73,10 @@ export default function DashboardPage() {
           </Card>
         </Col>
         <Col xs={24} md={8}>
-          <Card title="技术栈" variant="borderless">
+          <Card title='技术栈' style={cardStyle}>
             <Space wrap>
               {techStack.map((tag) => (
-                <Tag key={tag} color="blue">
+                <Tag key={tag} color='blue'>
                   {tag}
                 </Tag>
               ))}

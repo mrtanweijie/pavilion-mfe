@@ -41,20 +41,22 @@ export default function DetailPage() {
     : []
 
   return (
-    <div>
-      <Space style={{ marginBottom: 16 }}>
-        <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/list')}>
-          返回列表
-        </Button>
-      </Space>
+    <div style={{ padding: '28px 32px' }}>
+      <div style={{ background: '#fff', border: '1px solid #E2E8F0', borderRadius: 12, padding: 20 }}>
+        <Space style={{ marginBottom: 16 }}>
+          <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/list')}>
+            返回列表
+          </Button>
+        </Space>
 
-      <Card title="详情页" variant="borderless">
-        {item ? (
-          <Descriptions items={items} column={2} bordered />
-        ) : (
-          <Empty description={`未找到该记录 (id: ${id})`} />
-        )}
-      </Card>
+        <Card title='详情页' style={{ borderRadius: 8 }}>
+          {item ? (
+            <Descriptions items={items} column={2} bordered />
+          ) : (
+            <Empty description={`未找到该记录 (id: ${id})`} />
+          )}
+        </Card>
+      </div>
     </div>
   )
 }

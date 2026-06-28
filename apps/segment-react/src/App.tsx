@@ -42,8 +42,11 @@ function ErrorFallback({ error }: { error: Error }) {
 
 // ---------- Antd 主题 ----------
 const themeToken = {
-  colorPrimary: '#1890ff',
-  borderRadius: 6,
+  colorPrimary: '#635BFF',
+  borderRadius: 8,
+  colorBgContainer: '#FFFFFF',
+  colorBgLayout: '#F6F9FC',
+  controlHeight: 40,
 }
 
 // ---------- App ----------
@@ -52,10 +55,7 @@ export default function App({ router }: { router: Router }) {
     <ErrorBoundary fallback={ErrorFallback}>
       <ConfigProvider theme={{ token: themeToken }}>
         <AntApp>
-          <div className="react-app">
-            <h2 className="react-app-title">React 子应用</h2>
-            <RouterProvider router={router} future={{ v7_startTransition: true }} />
-          </div>
+          <RouterProvider router={router} future={{ v7_startTransition: true }} />
         </AntApp>
       </ConfigProvider>
     </ErrorBoundary>

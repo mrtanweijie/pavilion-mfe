@@ -33,8 +33,8 @@
         :style="{ left: contextMenu.x + 'px', top: contextMenu.y + 'px' }"
         @click.stop
       >
-        <div class="context-item" @click="closeOthers(contextMenu.tabId)">关闭其他</div>
-        <div class="context-item" @click="closeAll()">关闭全部</div>
+        <div class="context-item" @click="closeOthers(contextMenu.tabId); contextMenu.visible = false">关闭其他</div>
+        <div class="context-item" @click="closeAll(); contextMenu.visible = false">关闭全部</div>
       </div>
       <div
         v-if="contextMenu.visible"
@@ -141,17 +141,19 @@ function handleClose(tabId: string) {
 <style scoped>
 .tab-bar {
   flex-shrink: 0;
-  height: 36px;
-  background-color: #e8eaed;
-  border-bottom: 1px solid #d4d7db;
+  height: 40px;
+  background-color: var(--card-bg);
+  border-bottom: 1px solid var(--border);
   overflow: hidden;
   user-select: none;
+  padding: 0 8px;
 }
 
 .tab-list {
   display: flex;
-  align-items: flex-end;
+  align-items: stretch;
   height: 100%;
+  gap: 0;
   transition: transform 0.15s ease;
   white-space: nowrap;
 }
@@ -159,27 +161,28 @@ function handleClose(tabId: string) {
 .tab-item {
   display: flex;
   align-items: center;
-  gap: 4px;
-  height: 30px;
-  min-width: 100px;
+  gap: 6px;
+  height: 100%;
+  min-width: 110px;
   max-width: 180px;
-  padding: 0 10px;
-  font-size: 12px;
-  color: #666;
-  background-color: #d4d7db;
-  border-radius: 6px 6px 0 0;
-  margin-right: 2px;
+  padding: 0 16px;
+  font-size: 13px;
+  color: var(--text-muted);
+  background-color: transparent;
+  border-bottom: 2px solid transparent;
   cursor: pointer;
-  transition: background-color 0.15s;
+  transition: color 0.15s, background-color 0.15s, border-color 0.15s;
 }
 
 .tab-item:hover {
-  background-color: #c8cbd0;
+  color: var(--text-primary);
+  background-color: rgba(0, 0, 0, 0.03);
 }
 
 .tab-item.active {
-  background-color: #fff;
-  color: #333;
+  color: var(--text-primary);
+  background-color: var(--background);
+  border-bottom-color: var(--primary);
   font-weight: 500;
 }
 
@@ -192,15 +195,14 @@ function handleClose(tabId: string) {
 
 .tab-close {
   flex-shrink: 0;
-  width: 16px;
-  height: 16px;
-  line-height: 1;
+  width: 18px;
+  height: 18px;
+  line-height: 18px;
   text-align: center;
   font-size: 14px;
-  color: #999;
-  border-radius: 50%;
+  color: var(--text-muted);
   opacity: 0;
-  transition: opacity 0.1s, background-color 0.15s;
+  transition: opacity 0.1s, background-color 0.15s, color 0.15s;
 }
 
 .tab-item:hover .tab-close,
@@ -209,8 +211,8 @@ function handleClose(tabId: string) {
 }
 
 .tab-close:hover {
-  background-color: #ddd;
-  color: #333;
+  background-color: var(--primary-light);
+  color: var(--primary);
 }
 
 /* 右键菜单 */
@@ -218,21 +220,23 @@ function handleClose(tabId: string) {
   position: fixed;
   z-index: 9999;
   min-width: 120px;
-  background-color: #fff;
-  border-radius: 6px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  background-color: var(--card-bg);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   padding: 4px 0;
+  border: 1px solid var(--border);
 }
 
 .context-item {
   padding: 8px 16px;
   font-size: 13px;
-  color: #333;
+  color: var(--text-primary);
   cursor: pointer;
+  transition: background-color 0.1s;
 }
 
 .context-item:hover {
-  background-color: #f0f2f5;
+  background-color: var(--background);
 }
 
 .context-overlay {

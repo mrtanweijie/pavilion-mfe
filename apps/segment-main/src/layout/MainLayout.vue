@@ -100,52 +100,94 @@ onUnmounted(() => {
 </script>
 
 <style>
+/* ─── Design Tokens ─── */
+:root {
+  --primary: #635BFF;
+  --primary-hover: #5147E0;
+  --primary-light: rgba(99, 91, 255, 0.08);
+  --primary-active: rgba(99, 91, 255, 0.18);
+  --success: #38A169;
+  --danger: #E53E3E;
+  --warning: #ED8936;
+  --text-primary: #1A202C;
+  --text-regular: #4A5568;
+  --text-muted: #A0AEC0;
+  --background: #F6F9FC;
+  --card-bg: #FFFFFF;
+  --border: #E2E8F0;
+  --sidebar-bg: #1A202C;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+}
+
+/* Override Element Plus primary */
+:root {
+  --el-color-primary: #635BFF;
+  --el-color-primary-light-3: rgba(99, 91, 255, 0.7);
+  --el-color-primary-light-5: rgba(99, 91, 255, 0.5);
+  --el-color-primary-light-7: rgba(99, 91, 255, 0.3);
+  --el-color-primary-light-8: rgba(99, 91, 255, 0.2);
+  --el-color-primary-light-9: rgba(99, 91, 255, 0.1);
+  --el-color-primary-dark-2: #5147E0;
+  --el-border-radius-base: 8px;
+}
+
 /* 全局重置 */
-* {
-  box-sizing: border-box;
-}
-html,
-body,
-#app {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-}
+* { box-sizing: border-box; }
+html, body, #app { margin: 0; padding: 0; height: 100%; }
 
 /* 布局 */
-.segment-main {
-  height: 100%;
-}
+.segment-main { height: 100%; }
 
-/* el-menu 全局覆盖（必须非 scoped 才能穿透 Element Plus） */
+/* el-menu 全局覆盖（穿透 Element Plus） */
 .el-menu {
   border-right: none !important;
   flex: 1;
 }
+.el-menu-item {
+  border-left: 3px solid transparent !important;
+}
 .el-menu-item.is-active {
-  background-color: rgba(255, 255, 255, 0.15) !important;
+  background-color: rgba(99, 91, 255, 0.15) !important;
+  color: #fff !important;
+  border-left-color: #635BFF !important;
 }
 .el-sub-menu .el-menu {
-  background-color: #15152a !important;
+  background-color: rgba(0, 0, 0, 0.15) !important;
+}
+/* 折叠后弹出的子菜单（el-popper），保持深色背景 */
+.el-menu--popup {
+  background-color: var(--sidebar-bg) !important;
+  border-radius: var(--radius-md) !important;
+}
+.el-menu--popup .el-menu-item {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+.el-menu--popup .el-menu-item:hover {
+  background-color: rgba(255, 255, 255, 0.07) !important;
+}
+.el-menu--popup .el-menu-item.is-active {
+  background-color: var(--primary-active) !important;
+  color: #fff !important;
 }
 .el-sub-menu__title:hover,
 .el-menu-item:hover {
-  background-color: rgba(255, 255, 255, 0.08) !important;
+  background-color: rgba(255, 255, 255, 0.07) !important;
 }
 
 /* 主内容区 */
 .segment-main .main {
-  background-color: #f0f2f5;
+  background-color: var(--background);
   padding: 0;
   overflow: hidden;
   display: flex;
   flex-direction: column;
 }
 
-/* 内容区（TabBar 下方） */
 .main-content {
   flex: 1;
-  padding: 20px;
+  padding: 28px 32px;
   overflow: auto;
 }
 
@@ -153,7 +195,6 @@ body,
   padding: 0;
 }
 
-/* 微前端容器 */
 #pavilion-mfe-container {
   height: 100%;
   min-height: 400px;

@@ -1,7 +1,8 @@
+import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Table, Tag, Button, Space } from 'antd'
+import { Table, Tag, Button, Space, Input, Select, Form, Card } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
-import { ArrowLeftOutlined, EyeOutlined } from '@ant-design/icons'
+import { ArrowLeftOutlined, EyeOutlined, SearchOutlined, ReloadOutlined } from '@ant-design/icons'
 
 interface TaskItem {
   id: number
@@ -32,6 +33,22 @@ const priorityMap: Record<string, string> = {
 
 export default function ListPage() {
   const navigate = useNavigate()
+  const [keyword, setKeyword] = useState('')
+  const [status, setStatus] = useState<string>()
+
+  const filteredData = useMemo(() =>
+    listData.filter((item) => {
+      const matchKeyword = !keyword || item.name.includes(keyword)
+      const matchStatus = !status || item.status === status
+      return matchKeyword && matchStatus
+    }),
+    [keyword, status],
+  )
+
+  const handleReset = () => {
+    setKeyword('')
+    setStatus(undefined)
+  }
 
   const columns: ColumnsType<TaskItem> = [
     { title: 'ID', dataIndex: 'id', key: 'id', width: 80 },
@@ -40,9 +57,9 @@ export default function ListPage() {
       title: '状态',
       dataIndex: 'status',
       key: 'status',
-      render: (status: string) => {
-        const s = statusMap[status]
-        return <Tag color={s?.color}>{s?.label}</Tag>
+      render: (s: string) => {
+        const statusInfo = statusMap[s]
+        return <Tag color={statusInfo?.color}>{statusInfo?.label}</Tag>
       },
     },
     {
@@ -57,8 +74,8 @@ export default function ListPage() {
       width: 100,
       render: (_, record) => (
         <Button
-          type="link"
-          size="small"
+          type='link'
+          size='small'
           icon={<EyeOutlined />}
           onClick={() => navigate(`/detail?id=${record.id}`)}
         >
@@ -69,20 +86,61 @@ export default function ListPage() {
   ]
 
   return (
-    <div>
-      <Space style={{ marginBottom: 16 }}>
-        <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/')}>
-          返回仪表盘
-        </Button>
-      </Space>
+    <div style={{ padding: '28px 32px' }}>
+      {/* 搜索表单 */}
+      <Card style={{ marginBottom: 16, borderRadius: 8, border: '1px solid #E2E8F0' }}>
+        <Form layout='inline'>
+          <Form.Item label='关键词'>
+            <Input
+              placeholder='任务名称'
+              value={keyword}
+              onChange={(e) => setKeyword(e.target.value)}
+              allowClear
+              style={{ width: 200 }}
+            />
+          </Form.Item>
+          <Form.Item label='状态'>
+            <Select
+              placeholder='全部'
+              value={status}
+              onChange={setStatus}
+              allowClear
+              style={{ width: 140 }}
+              options={[
+                { label: '已完成', value: '已完成' },
+                { label: '进行中', value: '进行中' },
+                { label: '待开始', value: '待开始' },
+              ]}
+            />
+          </Form.Item>
+          <Form.Item>
+            <Space>
+              <Button type='primary' icon={<SearchOutlined />}>
+                搜索
+              </Button>
+              <Button icon={<ReloadOutlined />} onClick={handleReset}>
+                重置
+              </Button>
+            </Space>
+          </Form.Item>
+        </Form>
+      </Card>
 
-      <Table<TaskItem>
-        dataSource={listData}
-        columns={columns}
-        rowKey="id"
-        pagination={false}
-        bordered
-      />
+      {/* 数据表格 */}
+      <Card style={{ borderRadius: 8, border: '1px solid #E2E8F0' }}>
+        <Space style={{ marginBottom: 16 }}>
+          <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/')}>
+            返回
+          </Button>
+        </Space>
+
+        <Table<TaskItem>
+          dataSource={filteredData}
+          columns={columns}
+          rowKey='id'
+          pagination={false}
+        />
+      </Card>
     </div>
   )
 }
