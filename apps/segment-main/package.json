@@ -17,7 +17,8 @@
     "@module-federation/runtime": "^2.6.0",
     "element-plus": "^2.8.0",
     "@element-plus/icons-vue": "^2.3.0",
-    "vue-router": "^4.4.0"
+    "vue-router": "^4.4.0",
+    "@pavilion-mfe/tabs": "workspace:*"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.1.0",

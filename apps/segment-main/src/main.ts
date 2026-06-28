@@ -7,6 +7,7 @@ import { loadRemote } from '@module-federation/runtime'
 import mfeConfig from '../mfe.json'
 import { fetchMenus } from './api/menu'
 import router from './router'
+import { tabsPlugin } from '@pavilion-mfe/tabs/vue'
 import App from './App.vue'
 
 // ─── PavilionMfe log configuration ───
@@ -43,6 +44,7 @@ const app = createApp(App)
 
 // 注册 Vue Router
 app.use(router)
+app.use(tabsPlugin)
 
 // 注册 Element Plus
 app.use(ElementPlus)
