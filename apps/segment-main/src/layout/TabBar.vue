@@ -49,6 +49,8 @@
 import { ref, reactive, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useTabs } from '@pavilion-mfe/tabs/vue'
+import { navigateTo, createPathMatcher } from '@pavilion-mfe/router'
+import mfeConfig from '../../mfe.json'
 
 const router = useRouter()
 const {
@@ -59,16 +61,30 @@ const {
   closeAll,
 } = useTabs()
 
+/** 判断路径是否为子应用路由 */
+function isSubAppPath(path: string): boolean {
+  return mfeConfig.apps.some((app) =>
+    createPathMatcher(app.routes)(path),
+  )
+}
+
 // ─── 水平滚动 ───
 
 const tabListRef = ref<HTMLElement | null>(null)
 const scrollLeft = ref(0)
 
+function clampScroll() {
+  if (!tabListRef.value) return
+  const containerWidth = tabListRef.value.parentElement!.clientWidth
+  const scrollWidth = tabListRef.value.scrollWidth
+  const maxScroll = Math.min(0, containerWidth - scrollWidth)
+  scrollLeft.value = Math.max(maxScroll, Math.min(0, scrollLeft.value))
+}
+
 function onWheel(e: WheelEvent) {
   const delta = e.deltaY || e.deltaX
   scrollLeft.value -= delta
-  // 限制滚动范围
-  scrollLeft.value = Math.min(0, scrollLeft.value)
+  clampScroll()
 }
 
 /** 切换 Tab 时自动滚动到可见区域 */
@@ -83,7 +99,7 @@ watch(activeTabId, () => {
   } else if (tabRect.right > listRect.right) {
     scrollLeft.value -= tabRect.right - listRect.right
   }
-  scrollLeft.value = Math.min(0, scrollLeft.value)
+  clampScroll()
 })
 
 // ─── 右键菜单 ───
@@ -96,22 +112,29 @@ const contextMenu = reactive({
 })
 
 function onContextMenu(e: MouseEvent, tab: (typeof tabs.value)[number]) {
+  const menuWidth = 130
+  const menuHeight = 72
   contextMenu.visible = true
-  contextMenu.x = e.clientX
-  contextMenu.y = e.clientY
+  contextMenu.x = Math.min(e.clientX, window.innerWidth - menuWidth)
+  contextMenu.y = Math.min(e.clientY, window.innerHeight - menuHeight)
   contextMenu.tabId = tab.id
 }
 
 // ─── 事件处理 ───
 
 function handleTabClick(tab: (typeof tabs.value)[number]) {
+  contextMenu.visible = false
   if (tab.id === activeTabId.value) return
-  router.push(tab.path)
+  const target = tab.fullPath || tab.path
+  if (isSubAppPath(tab.path)) {
+    navigateTo(target)
+  } else {
+    router.push(target)
+  }
 }
 
 function handleClose(tabId: string) {
   closeTab(tabId)
-  contextMenu.visible = false
 }
 </script>
 
@@ -171,7 +194,7 @@ function handleClose(tabId: string) {
   flex-shrink: 0;
   width: 16px;
   height: 16px;
-  line-height: 14px;
+  line-height: 1;
   text-align: center;
   font-size: 14px;
   color: #999;

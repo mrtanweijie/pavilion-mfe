@@ -49,6 +49,9 @@ importers:
       '@module-federation/runtime':
         specifier: ^2.6.0
         version: 2.6.0
+      '@pavilion-mfe/tabs':
+        specifier: workspace:*
+        version: link:../../packages/tabs
       element-plus:
         specifier: ^2.8.0
         version: 2.14.2(vue@3.5.39)

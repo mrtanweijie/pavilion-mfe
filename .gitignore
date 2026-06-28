@@ -7,3 +7,4 @@ coverage/
 .claude/
 .mf/
 @mf-types/
+docs/*

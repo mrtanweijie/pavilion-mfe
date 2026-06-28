@@ -69,10 +69,12 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { navigateTo } from '@pavilion-mfe/router'
+import { useTabs } from '@pavilion-mfe/tabs/vue'
 import { menus } from '../api/menu'
 
 const router = useRouter()
 const menuList = menus
+const { openTab } = useTabs()
 const isCollapse = ref(false)
 
 /** 当前路径（响应式，监听子应用内部导航） */
@@ -99,6 +101,17 @@ const mainAppPaths = ['/', '/test', '/env', '/403', '/404']
 
 /** el-menu 选中回调 */
 function handleSelect(index: string) {
+  // 查找菜单标题
+  let title = index
+  for (const menu of menuList.value) {
+    for (const child of menu.childrenMenuInfoList ?? []) {
+      if (child.menuUrl === index) { title = child.menuName; break }
+    }
+    if (menu.menuUrl === index) { title = menu.menuName; break }
+  }
+
+  openTab({ path: index, title })
+
   if (mainAppPaths.includes(index)) {
     router.push(index)
   } else {
