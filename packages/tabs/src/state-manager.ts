@@ -30,10 +30,13 @@ export class TabsStateManager {
   }
 
   addTab(tab: TabInfo): void {
-    const exists = this.state.tabs.find((t) => t.id === tab.id)
-    if (!exists) {
+    const idx = this.state.tabs.findIndex((t) => t.id === tab.id)
+    if (idx === -1) {
       const isCached = this.shouldCacheNext || (tab.cached ?? true)
       this.state.tabs = [...this.state.tabs, { ...tab, cached: isCached }]
+    } else {
+      // 更新已有 Tab 的属性（如 title），保留 cached 状态
+      this.state.tabs[idx] = { ...this.state.tabs[idx], ...tab, cached: this.state.tabs[idx].cached }
     }
     this.state.activeTabId = tab.id
     this.shouldCacheNext = false

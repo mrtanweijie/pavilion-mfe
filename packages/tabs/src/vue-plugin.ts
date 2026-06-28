@@ -4,12 +4,15 @@ import { TabsStateManager, type TabInfo } from './state-manager.js'
 
 // ─── Public API ───
 
+/** openTab 入参：path + title 必填，其余可选 */
+export type OpenTabInput = Pick<TabInfo, 'path' | 'title'> & Partial<Omit<TabInfo, 'id'>> & { id?: string }
+
 export interface TabsAPI {
   tabs: Ref<TabInfo[]>
   activeTabId: Ref<string | null>
   activeTab: ComputedRef<TabInfo | null>
-  /** 打开 Tab（已存在则切换）；id 默认取 path */
-  openTab(tab: Omit<TabInfo, 'id'> & { id?: string }): void
+  /** 打开 Tab（已存在则切换）；id / fullPath 默认取 path */
+  openTab(tab: OpenTabInput): void
   closeTab(tabId: string): void
   closeOthers(tabId: string): void
   closeAll(): void
@@ -18,6 +21,26 @@ export interface TabsAPI {
 // ─── Injection key ───
 
 const TABS_KEY: InjectionKey<TabsAPI> = Symbol('pavilion-mfe-tabs')
+
+// ─── sessionStorage 持久化 ───
+
+const STORAGE_KEY = 'pavilion-mfe:tabs-state'
+
+function saveState(state: { tabs: TabInfo[]; activeTabId: string | null }) {
+  try {
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state))
+  } catch { /* ignore quota errors */ }
+}
+
+function loadState(): { tabs: TabInfo[]; activeTabId: string | null } | null {
+  try {
+    const raw = sessionStorage.getItem(STORAGE_KEY)
+    if (!raw) return null
+    return JSON.parse(raw)
+  } catch {
+    return null
+  }
+}
 
 // ─── Plugin ───
 
@@ -36,11 +59,13 @@ export const tabsPlugin = {
       const state = manager.getState()
       tabs.value = state.tabs
       activeTabId.value = state.activeTabId
+      saveState(state)
     }
 
-    function openTab(tab: Omit<TabInfo, 'id'> & { id?: string }) {
+    function openTab(tab: OpenTabInput) {
       const id = tab.id ?? tab.path
-      manager.addTab({ ...tab, id })
+      const fullPath = tab.fullPath ?? tab.path
+      manager.addTab({ fullPath, ...tab, id } as TabInfo)
       sync()
     }
 
@@ -70,6 +95,14 @@ export const tabsPlugin = {
       closeTab,
       closeOthers,
       closeAll,
+    }
+
+    // 从 sessionStorage 恢复上次的 Tab 状态
+    const saved = loadState()
+    if (saved?.tabs.length) {
+      for (const tab of saved.tabs) {
+        manager.addTab(tab)
+      }
     }
 
     // 初始化同步
