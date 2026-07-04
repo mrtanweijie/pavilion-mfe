@@ -399,6 +399,9 @@ cd apps/segment-main && pnpm dev
 # 启动 Vue 子应用（独立开发或配合主应用）
 cd apps/segment-demo && pnpm dev
 
+# 启动 Vue 2 子应用
+cd apps/segment-vue2 && pnpm dev
+
 # 启动 React 子应用
 cd apps/segment-react && pnpm dev
 
