@@ -99,6 +99,22 @@ async function doFetchMenus(): Promise<MenuItem[]> {
         { menuCode: 'react-app/test', menuName: '不存在', menuEnglishName: 'Not Found', menuTp: '1', parentCode: 'react-app', orderNo: 4, status: '1', menuUrl: '/react/test', menuIcon: 'WarningFilled' },
       ],
     },
+    {
+      menuCode: 'vue2-app',
+      menuName: 'Demo (Vue 2)',
+      menuEnglishName: 'Demo (Vue 2)',
+      menuTp: '0',
+      parentCode: '',
+      orderNo: 4,
+      status: '1',
+      menuUrl: '/vue2',
+      menuIcon: 'IceCream',
+      childrenMenuInfoList: [
+        { menuCode: 'vue2-app/list', menuName: '列表页', menuEnglishName: 'List', menuTp: '1', parentCode: 'vue2-app', orderNo: 1, status: '1', menuUrl: '/vue2/list', menuIcon: 'Operation' },
+        { menuCode: 'vue2-app/detail', menuName: '详情页', menuEnglishName: 'Detail', menuTp: '1', parentCode: 'vue2-app', orderNo: 2, status: '1', menuUrl: '/vue2/detail', menuIcon: 'Document' },
+        { menuCode: 'vue2-app/form', menuName: '表单页', menuEnglishName: 'Form', menuTp: '1', parentCode: 'vue2-app', orderNo: 3, status: '1', menuUrl: '/vue2/form', menuIcon: 'SetUp' },
+      ],
+    },
     // ─── 系统工具 ───
     {
       menuCode: 'system',

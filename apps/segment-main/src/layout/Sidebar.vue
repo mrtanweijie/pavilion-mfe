@@ -169,6 +169,13 @@ function handleSelect(index: string) {
   margin-left: 0;
 }
 
+/* 菜单区域：占满剩余高度，溢出时滚动 */
+.el-menu {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
 /* 底部：用户信息 + 折叠按钮 */
 .sidebar-footer {
   display: flex;
