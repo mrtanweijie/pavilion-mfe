@@ -74,8 +74,15 @@ jobs:
           cp -r apps/segment-react/dist/* dist-ghpages/mfe/react-app/
           cp -r apps/segment-vue2/dist/* dist-ghpages/mfe/vue2-app/
 
-          # SPA fallback: copy main app index.html as 404.html
-          cp dist-ghpages/index.html dist-ghpages/404.html
+          # SPA fallback: save full path → redirect to base URL
+          cat > dist-ghpages/404.html << 'HTMLEOF'
+          <!DOCTYPE html>
+          <html><head><meta charset="utf-8"><script>
+          var segs = location.pathname.split('/');
+          sessionStorage.setItem('pavilion-redirect', location.pathname + location.search + location.hash);
+          location.replace('/' + segs[1] + '/');
+          </script></head><body>Redirecting...</body></html>
+          HTMLEOF
 
           echo "=== Deployment structure ==="
           find dist-ghpages -maxdepth 3 -type f | head -50
