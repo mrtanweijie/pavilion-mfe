@@ -72,11 +72,22 @@ const menuList = menus
 const { openTab } = useTabs()
 const isCollapse = ref(false)
 
+// 部署前缀（GitHub Pages 场景如 /pavilion-mfe，本地开发为 ''）
+const deployBasePath = (import.meta.env.BASE_URL || '/').replace(/\/$/, '')
+
+/** 去掉部署前缀，统一为应用内路径（如 /demo/list） */
+function normalizePath(rawPath: string): string {
+  if (deployBasePath && rawPath.startsWith(deployBasePath)) {
+    return rawPath.slice(deployBasePath.length) || '/'
+  }
+  return rawPath
+}
+
 /** 当前路径（响应式，监听子应用内部导航） */
-const currentPath = ref(window.location.pathname)
+const currentPath = ref(normalizePath(window.location.pathname))
 
 function syncPath() {
-  currentPath.value = window.location.pathname
+  currentPath.value = normalizePath(window.location.pathname)
 }
 
 onMounted(() => {
@@ -121,7 +132,8 @@ function handleSelect(index: string) {
   if (isMainAppRoute(index)) {
     router.push(index)
   } else {
-    navigateTo(index)
+    // 子应用路由：navigateTo 使用 window.history.pushState，需手动加上部署前缀
+    navigateTo(deployBasePath + index)
   }
 }
 

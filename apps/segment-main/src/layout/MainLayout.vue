@@ -25,6 +25,17 @@ const route = useRoute()
 const router = useRouter()
 const { tabs, openTab } = useTabs()
 
+// 部署前缀（GitHub Pages 场景如 /pavilion-mfe，本地开发为 ''）
+const deployBasePath = (import.meta.env.BASE_URL || '/').replace(/\/$/, '')
+
+/** 去掉部署前缀，统一为应用内路径（如 /demo/list） */
+function normalizePath(rawPath: string): string {
+  if (deployBasePath && rawPath.startsWith(deployBasePath)) {
+    return rawPath.slice(deployBasePath.length) || '/'
+  }
+  return rawPath
+}
+
 /** 当前路由是否属于微前端子应用 */
 const isSubAppRoute = computed(() =>
   mfeConfig.apps.some((app) =>
@@ -53,7 +64,8 @@ function findMenuTitle(path: string): string {
 function syncRouteToTabs(fullUrl: string) {
   // 分离路径和查询参数，用路径去重
   const url = new URL(fullUrl, window.location.origin)
-  const path = url.pathname
+  // 去掉部署前缀，统一为应用内路径（如 /demo/list），确保与菜单 URL 匹配
+  const path = normalizePath(url.pathname)
   const search = url.search
 
   if (path === '/403' || path === '/404' || path === '/500') return

@@ -61,6 +61,9 @@ const {
   closeAll,
 } = useTabs()
 
+// 部署前缀（GitHub Pages 场景如 /pavilion-mfe，本地开发为 ''）
+const deployBasePath = (import.meta.env.BASE_URL || '/').replace(/\/$/, '')
+
 /** 判断路径是否为子应用路由 */
 function isSubAppPath(path: string): boolean {
   return mfeConfig.apps.some((app) =>
@@ -127,7 +130,8 @@ function handleTabClick(tab: (typeof tabs.value)[number]) {
   if (tab.id === activeTabId.value) return
   const target = tab.fullPath || tab.path
   if (isSubAppPath(tab.path)) {
-    navigateTo(target)
+    // 子应用路由：navigateTo 使用 window.history.pushState，需手动加上部署前缀
+    navigateTo(deployBasePath + target)
   } else {
     router.push(target)
   }
