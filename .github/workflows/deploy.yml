@@ -1,0 +1,98 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build core packages
+        run: |
+          pnpm --filter @pavilion-mfe/sandbox build
+          pnpm --filter @pavilion-mfe/bridge build
+          pnpm --filter @pavilion-mfe/router build
+          pnpm --filter @pavilion-mfe/tabs build
+          pnpm --filter @pavilion-mfe/runtime build
+          pnpm --filter @pavilion-mfe/vite build
+
+      - name: Build sub-apps
+        run: |
+          pnpm --filter @pavilion-mfe/demo-segment build
+          pnpm --filter @pavilion-mfe/demo-segment-react build
+          pnpm --filter @pavilion-mfe/demo-segment-vue2 build
+        env:
+          VITE_PAVILION_MFE_CDN: ${{ vars.PAVILION_MFE_CDN || '/pavilion-mfe' }}
+
+      - name: Build main app
+        run: pnpm --filter @pavilion-mfe/segment-main build
+        env:
+          VITE_PAVILION_MFE_CDN: ${{ vars.PAVILION_MFE_CDN || '/pavilion-mfe' }}
+          VITE_DEPLOY_BASE: ${{ vars.VITE_DEPLOY_BASE || '/pavilion-mfe/' }}
+
+      - name: Collect dist artifacts
+        run: |
+          mkdir -p dist-ghpages/mfe
+
+          # Main app → root
+          cp -r apps/segment-main/dist/* dist-ghpages/
+
+          # Sub-apps → /mfe/<appCode>/
+          cp -r apps/segment-demo/dist/* dist-ghpages/mfe/demo-app/
+          cp -r apps/segment-react/dist/* dist-ghpages/mfe/react-app/
+          cp -r apps/segment-vue2/dist/* dist-ghpages/mfe/vue2-app/
+
+          # SPA fallback: copy main app index.html as 404.html
+          cp dist-ghpages/index.html dist-ghpages/404.html
+
+          echo "=== Deployment structure ==="
+          find dist-ghpages -maxdepth 3 -type f | head -50
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist-ghpages
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

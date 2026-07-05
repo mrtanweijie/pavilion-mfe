@@ -58,7 +58,9 @@ const routes = [
   },
 ]
 
+// Vite 的 base 配置自动注入为 import.meta.env.BASE_URL
+// 本地开发时为 "/"，GitHub Pages 部署时为 "/<repo>/"
 export default createRouter({
-  history: createWebHistory(),
+  history: createWebHistory(import.meta.env.BASE_URL),
   routes,
 })

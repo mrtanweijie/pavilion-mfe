@@ -412,6 +412,74 @@ pnpm --filter @pavilion-mfe/router build    # router 依赖 sandbox
 pnpm --filter @pavilion-mfe/vite build      # vite 独立
 ```
 
+## GitHub Pages 部署
+
+本项目支持一键部署到 GitHub Pages，使用 GitHub Actions 自动构建和发布。
+
+### 自动部署（推荐）
+
+推送代码到 `main` 分支即可自动触发部署。首次需要：
+
+1. GitHub 仓库 → **Settings** → **Pages**
+2. Source 选择 **GitHub Actions**
+
+CI 会依次构建核心包 → 子应用 → 主应用，最后把所有产物部署到 GitHub Pages。
+
+### 环境变量
+
+部署时可在仓库 **Settings** → **Secrets and variables** → **Variables** 中配置：
+
+| 变量 | 说明 | 示例 |
+|------|------|------|
+| `VITE_PAVILION_MFE_CDN` | CDN 基础路径 | `/my-repo`（项目页面）或留空（用户页面） |
+| `VITE_DEPLOY_BASE` | Vite/Vue Router 基础路径 | `/my-repo/`（项目页面）或 `/`（用户页面） |
+
+- **用户页面**（`username.github.io`）：两个变量都留空或不设置
+- **项目页面**（`username.github.io/my-repo`）：`CDN` 设为 `/my-repo`，`BASE` 设为 `/my-repo/`
+
+### 手动部署
+
+```bash
+# 1. 构建所有子应用（设置 CDN 基础路径）
+VITE_PAVILION_MFE_CDN=/my-repo pnpm --filter "./apps/segment-*" build
+
+# 2. 构建主应用
+VITE_DEPLOY_BASE=/my-repo/ pnpm --filter @pavilion-mfe/segment-main build
+
+# 3. 收集产物
+mkdir -p dist-ghpages/mfe
+cp -r apps/segment-main/dist/* dist-ghpages/
+cp -r apps/segment-demo/dist/* dist-ghpages/mfe/demo-app/
+cp -r apps/segment-react/dist/* dist-ghpages/mfe/react-app/
+cp -r apps/segment-vue2/dist/* dist-ghpages/mfe/vue2-app/
+cp dist-ghpages/index.html dist-ghpages/404.html  # SPA fallback
+
+# 4. 部署到 GitHub Pages（任选一种方式）
+# 方式 A：推送到 gh-pages 分支
+# 方式 B：使用 gh-pages npm 包
+npx gh-pages -d dist-ghpages
+```
+
+### 产物目录结构
+
+```
+dist-ghpages/
+├── index.html                    # 主应用入口
+├── 404.html                      # SPA fallback
+├── mf-manifest-main.json
+├── static/js/...                 # 主应用 chunk
+├── mfe/
+│   ├── demo-app/
+│   │   ├── mf-manifest-main.json
+│   │   └── static/js/...
+│   ├── react-app/
+│   │   ├── mf-manifest-main.json
+│   │   └── static/js/...
+│   └── vue2-app/
+│       ├── mf-manifest-main.json
+│       └── static/js/...
+```
+
 ## License
 
 MIT

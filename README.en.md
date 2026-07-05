@@ -397,6 +397,72 @@ pnpm --filter @pavilion-mfe/router build    # depends on sandbox
 pnpm --filter @pavilion-mfe/vite build
 ```
 
+## GitHub Pages Deployment
+
+This project supports one-click deployment to GitHub Pages via GitHub Actions.
+
+### Automatic Deployment (Recommended)
+
+Push to the `main` branch to trigger automatic deployment. First-time setup:
+
+1. GitHub repo → **Settings** → **Pages**
+2. Set Source to **GitHub Actions**
+
+The CI pipeline builds core packages → sub-apps → main app in order, then deploys all artifacts to GitHub Pages.
+
+### Environment Variables
+
+Configure in repo **Settings** → **Secrets and variables** → **Variables**:
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `VITE_PAVILION_MFE_CDN` | CDN base path for sub-app assets | `/my-repo` (project site) or empty (user site) |
+| `VITE_DEPLOY_BASE` | Vite/Vue Router base path | `/my-repo/` (project site) or `/` (user site) |
+
+- **User site** (`username.github.io`): leave both empty
+- **Project site** (`username.github.io/my-repo`): set `CDN` to `/my-repo`, `BASE` to `/my-repo/`
+
+### Manual Deployment
+
+```bash
+# 1. Build all sub-apps (with CDN base path)
+VITE_PAVILION_MFE_CDN=/my-repo pnpm --filter "./apps/segment-*" build
+
+# 2. Build main app
+VITE_DEPLOY_BASE=/my-repo/ pnpm --filter @pavilion-mfe/segment-main build
+
+# 3. Collect artifacts
+mkdir -p dist-ghpages/mfe
+cp -r apps/segment-main/dist/* dist-ghpages/
+cp -r apps/segment-demo/dist/* dist-ghpages/mfe/demo-app/
+cp -r apps/segment-react/dist/* dist-ghpages/mfe/react-app/
+cp -r apps/segment-vue2/dist/* dist-ghpages/mfe/vue2-app/
+cp dist-ghpages/index.html dist-ghpages/404.html  # SPA fallback
+
+# 4. Deploy
+npx gh-pages -d dist-ghpages
+```
+
+### Artifact Directory Structure
+
+```
+dist-ghpages/
+├── index.html                    # Main app entry
+├── 404.html                      # SPA fallback
+├── mf-manifest-main.json
+├── static/js/...                 # Main app chunks
+├── mfe/
+│   ├── demo-app/
+│   │   ├── mf-manifest-main.json
+│   │   └── static/js/...
+│   ├── react-app/
+│   │   ├── mf-manifest-main.json
+│   │   └── static/js/...
+│   └── vue2-app/
+│       ├── mf-manifest-main.json
+│       └── static/js/...
+```
+
 ## License
 
 MIT

@@ -45,6 +45,10 @@ export default defineConfig(({ command, mode }: ConfigEnv) => {
         dts: false,
       }),
     ],
+    // GitHub Pages 部署时通过 VITE_DEPLOY_BASE 设置基础路径
+    // 用户页面 (username.github.io):     "/" 或不设置
+    // 项目页面 (username.github.io/repo): "/<repo>/"
+    base: env.VITE_DEPLOY_BASE || '/',
     server: { port: 6010 },
     build: {
       rollupOptions: {
