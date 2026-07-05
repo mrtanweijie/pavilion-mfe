@@ -30,9 +30,10 @@ const routes = [
   },
 ]
 
-export function createVue2Router() {
+export function createVue2Router(base?: string) {
   const router = new VueRouter({
     mode: 'history',
+    base: base || '/',
     routes,
   })
 

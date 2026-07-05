@@ -22,15 +22,23 @@ console.log(
 
 /** 被主应用加载时调用 */
 export default {
-  mount: async (_ctx: any, el: HTMLElement) => {
+  mount: async (ctx: any, el: HTMLElement) => {
     console.log('[PavilionMfe 微前端] mount', appCode)
+
+    // 从完整 URL 中提取部署前缀（GitHub Pages 场景如 /pavilion-mfe）
+    const pathname = window.location.pathname
+    const basename = ctx.basename as string // e.g. '/demo'
+    const deployBase = basename && pathname.includes(basename)
+      ? pathname.slice(0, pathname.indexOf(basename))
+      : '/'
+
     const app = createApp(App)
     app.use(ElementPlus)
-    const router = createDemoRouter()
+    const router = createDemoRouter(deployBase)
     app.use(router)
     app.mount(el)
-    // 初始化后同步当前路径
-    router.replace(window.location.pathname + window.location.search)
+    // 同步当前路径（去除部署前缀后的子应用路径）
+    router.replace(pathname.slice(deployBase.length) + window.location.search)
     return () => app.unmount()
   },
   unmount: async (_ctx: any, el: HTMLElement) => {

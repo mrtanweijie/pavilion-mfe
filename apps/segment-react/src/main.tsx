@@ -21,11 +21,20 @@ console.log(
 
 /** 被主应用加载时调用 */
 export default {
-  mount: async (_ctx: any, el: HTMLElement) => {
-    
+  mount: async (ctx: any, el: HTMLElement) => {
+
     console.log('[PavilionMfe 微前端] mount', appCode)
 
-    const router = createSubAppRouter(_ctx?.basename)
+    // 计算完整 basename：部署前缀 + 子应用路由前缀
+    // GitHub Pages 如 /pavilion-mfe + /react = /pavilion-mfe/react
+    const pathname = window.location.pathname
+    const appBasename = ctx?.basename as string || '/react'
+    const deployBase = pathname.includes(appBasename)
+      ? pathname.slice(0, pathname.indexOf(appBasename))
+      : ''
+    const fullBasename = deployBase + appBasename
+
+    const router = createSubAppRouter(fullBasename)
     const root = createRoot(el)
     root.render(
       <React.StrictMode>

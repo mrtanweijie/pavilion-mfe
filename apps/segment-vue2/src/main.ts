@@ -25,22 +25,27 @@ console.log(
 
 /** 被主应用加载时调用 */
 export default {
-  mount: async (_ctx: any, el: HTMLElement) => {
+  mount: async (ctx: any, el: HTMLElement) => {
     console.log('[PavilionMfe 微前端] mount', appCode)
+
+    // 计算部署前缀（GitHub Pages 场景如 /pavilion-mfe）
+    const pathname = window.location.pathname
+    const basename = ctx.basename as string // e.g. '/vue2'
+    const deployBase = basename && pathname.includes(basename)
+      ? pathname.slice(0, pathname.indexOf(basename))
+      : '/'
 
     // $mount() 无参 → 创建离屏 DOM，手动 appendChild 精确控制 DOM 归属
     const instance = new Vue({
-      router: createVue2Router(),
+      router: createVue2Router(deployBase),
       render: (h) => h(App),
     }).$mount()
 
     el.appendChild(instance.$el)
 
-    // 初始化后同步当前路径
-    const path = window.location.pathname + window.location.search
-    if (path !== '/') {
-      instance.$router.replace(path).catch(() => {})
-    }
+    // 同步当前路径（去除部署前缀后的子应用路径）
+    const subPath = pathname.slice(deployBase.length) + window.location.search
+    instance.$router.replace(subPath).catch(() => {})
 
     // 返回框架级清理函数
     return () => {

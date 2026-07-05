@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory, type RouterHistory } from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
 
 const routes = [
   {
@@ -37,9 +37,9 @@ const routes = [
   },
 ]
 
-export function createDemoRouter(history?: RouterHistory) {
+export function createDemoRouter(base?: string) {
   const router = createRouter({
-    history: history ?? createWebHistory(),
+    history: createWebHistory(base || '/'),
     routes,
   })
 
