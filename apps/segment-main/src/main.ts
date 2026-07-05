@@ -10,6 +10,10 @@ import router from './router'
 import { tabsPlugin } from '@pavilion-mfe/tabs/vue'
 import App from './App.vue'
 
+// 部署前缀（GitHub Pages 场景如 /pavilion-mfe，本地开发为 ''）
+// Vite 构建时 base 配置会自动注入为 import.meta.env.BASE_URL
+const deployBasePath = (import.meta.env.BASE_URL || '/').replace(/\/$/, '')
+
 // ─── PavilionMfe log configuration ───
 // Toggle per-module: router | sandbox | preload | bridge
 // Set to false to silence that module's logs.
@@ -74,7 +78,14 @@ const pavilionMfeRouter = createPavilionMfeRouter({
         }
       }
     },
-    activeWhen: createPathMatcher(app.routes),
+    activeWhen: (path: string) => {
+      // 去掉部署前缀后再匹配子应用路由
+      // GitHub Pages 场景：path = '/pavilion-mfe/demo/list' → normalizedPath = '/demo/list'
+      const normalizedPath = deployBasePath && path.startsWith(deployBasePath)
+        ? path.slice(deployBasePath.length) || '/'
+        : path
+      return createPathMatcher(app.routes)(normalizedPath)
+    },
     basename: app.routes[0] ?? '',
     keepAlive: app.keepAlive ?? false,
   })),
