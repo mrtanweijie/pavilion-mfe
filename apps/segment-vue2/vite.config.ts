@@ -8,8 +8,9 @@ export default defineConfig(({ command, mode }: ConfigEnv) => {
   const env = loadEnv(mode, process.cwd(), '')
   const appCode = env.VITE_PAVILION_MFE_APP_CODE
   const pavilionMfeEnv = env.VITE_PAVILION_MFE_ENV || 'develop'
-  const cdn = env.VITE_PAVILION_MFE_CDN || ''
-  const apiBase = env.VITE_BASE_API_URL || ''
+  // 优先从 process.env 读取（CI），fallback 到 .env 文件
+  const cdn = process.env.VITE_PAVILION_MFE_CDN || env.VITE_PAVILION_MFE_CDN || ''
+  const apiBase = process.env.VITE_BASE_API_URL || env.VITE_BASE_API_URL || ''
 
   console.log(
     `${chalk.green.bold('[PavilionMfe 微前端]')} ${chalk.bold(appCode)}\n` +
@@ -24,6 +25,7 @@ export default defineConfig(({ command, mode }: ConfigEnv) => {
       PavilionMfe({
         role: 'sub-app',
         name: appCode,
+        cdn,
         exposes: {
           './main': './src/main.ts',
         },
