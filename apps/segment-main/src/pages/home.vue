@@ -3,6 +3,12 @@
     <div class="page-header">
       <h1>PavilionMfe 微前端框架</h1>
       <p class="page-subtitle">基于 Module Federation 的微前端开源框架，支持 Vue / React 混合渲染</p>
+      <p class="page-repo">
+        <el-icon :size="14"><Link /></el-icon>
+        <a href="https://github.com/mrtanweijie/pavilion-mfe" target="_blank" rel="noopener">
+          github.com/mrtanweijie/pavilion-mfe
+        </a>
+      </p>
     </div>
 
     <div class="app-cards">
@@ -53,6 +59,21 @@ const menuList = menus
   font-size: 13px;
   color: var(--text-muted);
   margin: 0;
+}
+.page-repo {
+  margin: 10px 0 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.page-repo a {
+  font-size: 13px;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.page-repo a:hover {
+  color: var(--primary);
 }
 
 .app-cards {
