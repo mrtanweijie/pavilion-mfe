@@ -62,7 +62,9 @@ jobs:
 
       - name: Collect dist artifacts
         run: |
-          mkdir -p dist-ghpages/mfe
+          mkdir -p dist-ghpages/mfe/demo-app
+          mkdir -p dist-ghpages/mfe/react-app
+          mkdir -p dist-ghpages/mfe/vue2-app
 
           # Main app → root
           cp -r apps/segment-main/dist/* dist-ghpages/
