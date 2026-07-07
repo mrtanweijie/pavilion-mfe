@@ -23,18 +23,16 @@ const activities = [
 
 const techStack = ['React 18', 'TypeScript', 'Module Federation', 'Vite 5', 'React Router 6', 'Ant Design 5']
 
-const cardStyle = { borderRadius: 12, border: '1px solid #E2E8F0' }
-
 export default function DashboardPage() {
   const navigate = useNavigate()
 
   return (
-    <div style={{ padding: '28px 32px' }}>
+    <div className="pav-page">
       {/* 统计卡片 */}
       <Row gutter={[16, 16]}>
         {statsCards.map((card) => (
           <Col xs={12} sm={6} key={card.label}>
-            <Card style={cardStyle}>
+            <Card>
               <Statistic
                 title={card.label}
                 value={card.value}
@@ -47,7 +45,7 @@ export default function DashboardPage() {
       </Row>
 
       {/* 快捷入口 */}
-      <Space style={{ marginTop: 16 }}>
+      <Space>
         <Button type='primary' icon={<ArrowRightOutlined />} onClick={() => navigate('/list')}>
           列表页
         </Button>
@@ -57,9 +55,9 @@ export default function DashboardPage() {
       </Space>
 
       {/* 活动 + 技术栈 */}
-      <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
+      <Row gutter={[16, 16]}>
         <Col xs={24} md={16}>
-          <Card title='近期活动' style={cardStyle}>
+          <Card title='近期活动'>
             <Timeline
               items={activities.map((item) => ({
                 children: (
@@ -73,7 +71,7 @@ export default function DashboardPage() {
           </Card>
         </Col>
         <Col xs={24} md={8}>
-          <Card title='技术栈' style={cardStyle}>
+          <Card title='技术栈'>
             <Space wrap>
               {techStack.map((tag) => (
                 <Tag key={tag} color='blue'>

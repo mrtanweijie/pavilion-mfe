@@ -86,9 +86,9 @@ export default function ListPage() {
   ]
 
   return (
-    <div style={{ padding: '28px 32px' }}>
+    <div className="pav-page">
       {/* 搜索表单 */}
-      <Card style={{ marginBottom: 16, borderRadius: 8, border: '1px solid #E2E8F0' }}>
+      <Card style={{ marginBottom: 0 }}>
         <Form layout='inline'>
           <Form.Item label='关键词'>
             <Input
@@ -127,7 +127,7 @@ export default function ListPage() {
       </Card>
 
       {/* 数据表格 */}
-      <Card style={{ borderRadius: 8, border: '1px solid #E2E8F0' }}>
+      <Card>
         <Space style={{ marginBottom: 16 }}>
           <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/')}>
             返回

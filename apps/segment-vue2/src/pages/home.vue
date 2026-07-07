@@ -20,11 +20,11 @@ export default {
 <style scoped>
 .page-home { }
 .card {
-  background: #fff;
-  border: 1px solid #E2E8F0;
-  border-radius: 12px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
   padding: 28px;
 }
-.welcome-card h2 { margin: 0 0 6px; font-size: 20px; color: #1A202C; font-weight: 700; }
-.card-desc { margin: 0; font-size: 13px; color: #A0AEC0; }
+.welcome-card h2 { margin: 0 0 6px; font-size: 20px; color: var(--text-primary); font-weight: 700; }
+.card-desc { margin: 0; font-size: 13px; color: var(--text-muted); }
 </style>

@@ -79,12 +79,12 @@ export default {
   gap: 16px;
 }
 .card {
-  background: #fff;
-  border: 1px solid #E2E8F0;
-  border-radius: 12px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
   padding: 20px;
 }
-.card-title { font-size: 14px; font-weight: 700; color: #1A202C; margin-bottom: 16px; }
+.card-title { font-size: 14px; font-weight: 700; color: var(--text-primary); margin-bottom: 16px; }
 .search-form { margin-bottom: 0; }
 .search-card .el-form-item { margin-bottom: 0; }
 </style>

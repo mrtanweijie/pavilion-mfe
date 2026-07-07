@@ -41,15 +41,15 @@ export default function DetailPage() {
     : []
 
   return (
-    <div style={{ padding: '28px 32px' }}>
-      <div style={{ background: '#fff', border: '1px solid #E2E8F0', borderRadius: 12, padding: 20 }}>
+    <div className="pav-page">
+      <div className="pav-card">
         <Space style={{ marginBottom: 16 }}>
           <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/list')}>
             返回列表
           </Button>
         </Space>
 
-        <Card title='详情页' style={{ borderRadius: 8 }}>
+        <Card title='详情页'>
           {item ? (
             <Descriptions items={items} column={2} bordered />
           ) : (

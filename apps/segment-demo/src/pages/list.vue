@@ -73,9 +73,14 @@ function viewItem(item: any) { router.push({ path: '/demo/detail', query: { id: 
   background: var(--card-bg);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 20px;
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--transition-fast);
 }
-.card-title { font-size: 14px; font-weight: 700; color: var(--text-primary); margin-bottom: 16px; }
+.card:hover {
+  box-shadow: var(--shadow-md);
+}
+.card-title { font-size: 15px; font-weight: 700; color: var(--text-primary); margin-bottom: 20px; }
 .search-form { margin-bottom: 0; }
 .search-card .el-form-item { margin-bottom: 0; }
 </style>

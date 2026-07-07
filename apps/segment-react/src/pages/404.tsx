@@ -5,7 +5,7 @@ export default function NotFound() {
   const navigate = useNavigate()
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+    <div className="pav-center">
       <Result
         status='404'
         title='404'

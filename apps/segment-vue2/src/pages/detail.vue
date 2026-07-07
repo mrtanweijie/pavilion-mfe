@@ -44,10 +44,10 @@ export default {
 <style scoped>
 .page-detail { }
 .card {
-  background: #fff;
-  border: 1px solid #E2E8F0;
-  border-radius: 12px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
   padding: 20px;
 }
-.card-title { font-size: 14px; font-weight: 700; color: #1A202C; margin-bottom: 16px; }
+.card-title { font-size: 14px; font-weight: 700; color: var(--text-primary); margin-bottom: 16px; }
 </style>

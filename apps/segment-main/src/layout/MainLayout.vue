@@ -121,6 +121,7 @@ onUnmounted(() => {
 <style>
 /* ─── Design Tokens ─── */
 :root {
+  /* 品牌色 */
   --primary: #635BFF;
   --primary-hover: #5147E0;
   --primary-light: rgba(99, 91, 255, 0.08);
@@ -128,16 +129,38 @@ onUnmounted(() => {
   --success: #38A169;
   --danger: #E53E3E;
   --warning: #ED8936;
+
+  /* 文字 */
   --text-primary: #1A202C;
   --text-regular: #4A5568;
   --text-muted: #A0AEC0;
+
+  /* 背景 */
   --background: #F6F9FC;
   --card-bg: #FFFFFF;
   --border: #E2E8F0;
   --sidebar-bg: #1A202C;
+
+  /* 圆角 */
   --radius-sm: 6px;
   --radius-md: 8px;
   --radius-lg: 12px;
+
+  /* 间距 */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+
+  /* 阴影 */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.10);
+
+  /* 过渡 */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.25s ease;
 }
 
 /* Override Element Plus primary */

@@ -11,9 +11,9 @@ export default function IndexPage() {
   const navigate = useNavigate()
 
   return (
-    <div style={{ padding: '28px 32px' }}>
-      <h2 style={{ margin: '0 0 6px', fontSize: 22, fontWeight: 700, color: '#1A202C' }}>React 子应用</h2>
-      <p style={{ margin: '0 0 24px', fontSize: 13, color: '#A0AEC0' }}>基于 Ant Design + React Router</p>
+    <div className="pav-page">
+      <h2 style={{ margin: '0 0 6px', fontSize: 22, fontWeight: 700 }} className="pav-text-primary">React 子应用</h2>
+      <p style={{ margin: '0 0 24px', fontSize: 13 }} className="pav-text-muted">基于 Ant Design + React Router</p>
 
       <Row gutter={[16, 16]}>
         {navCards.map((card) => (
@@ -24,10 +24,10 @@ export default function IndexPage() {
               style={{ borderRadius: 12, height: '100%' }}
             >
               <Space direction='vertical' size={8}>
-                <div style={{ color: '#635BFF' }}>{card.icon}</div>
+                <div className="pav-accent">{card.icon}</div>
                 <div>
-                  <div style={{ fontSize: 15, fontWeight: 600, color: '#1A202C' }}>{card.title}</div>
-                  <div style={{ fontSize: 12, color: '#A0AEC0', marginTop: 4 }}>{card.desc}</div>
+                  <div style={{ fontSize: 15, fontWeight: 600 }} className="pav-text-primary">{card.title}</div>
+                  <div style={{ fontSize: 12, marginTop: 4 }} className="pav-text-muted">{card.desc}</div>
                 </div>
               </Space>
             </Card>
