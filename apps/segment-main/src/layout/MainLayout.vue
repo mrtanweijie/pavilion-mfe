@@ -5,14 +5,21 @@
       <TabBar />
       <div class="main-content" :class="{ 'sub-app-mode': isSubAppRoute }">
         <router-view v-show="!isSubAppRoute" />
-        <div id="pavilion-mfe-container" v-show="isSubAppRoute"></div>
+        <div v-show="isSubAppRoute" class="sub-app-wrapper">
+          <Transition name="fade">
+            <div v-if="isSubAppLoading" class="sub-app-loading">
+              <el-skeleton :rows="6" animated />
+            </div>
+          </Transition>
+          <div id="pavilion-mfe-container"></div>
+        </div>
       </div>
     </el-main>
   </el-container>
 </template>
 
 <script setup lang="ts">
-import { computed, watch, onMounted, onUnmounted } from 'vue'
+import { computed, watch, onMounted, onUnmounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useTabs } from '@pavilion-mfe/tabs/vue'
 import { createPathMatcher } from '@pavilion-mfe/router'
@@ -42,6 +49,14 @@ const isSubAppRoute = computed(() =>
     createPathMatcher(app.routes)(route.path),
   ),
 )
+
+/** 子应用加载状态 */
+const isSubAppLoading = ref(false)
+
+// 进入子应用路由时显示 loading，子应用挂载完成后隐藏
+watch(isSubAppRoute, (val) => {
+  if (val) isSubAppLoading.value = true
+})
 
 // ─── 路由 → Tab 单向同步 ───
 
@@ -105,6 +120,7 @@ watch(
 // 监听子应用内部导航（pushState / popstate），同步 Tab
 function onUrlChange() {
   syncRouteToTabs(window.location.pathname + window.location.search)
+  isSubAppLoading.value = false
 }
 
 onMounted(() => {
@@ -257,5 +273,30 @@ html, body, #app { margin: 0; padding: 0; height: 100%; }
 #pavilion-mfe-container {
   height: 100%;
   min-height: 400px;
+}
+
+/* ─── Sub-App Loading ─── */
+.sub-app-wrapper {
+  position: relative;
+  height: 100%;
+  min-height: 400px;
+}
+
+.sub-app-loading {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  padding: 28px 32px;
+  background: var(--card-bg);
+}
+
+/* Fade transition for loading overlay */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>
